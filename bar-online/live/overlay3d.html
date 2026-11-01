@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overlay 3D 9:16 · Vũ Trường Cõi Mạng</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#07030c; --fg:#f5edff; --muted:#a694bf; --gold:#ffcc00; --gold2:#ffe680; --pink:#ff007f; --blue:#00f0ff;
+  --panel:rgba(18,10,30,.82); --line:rgba(255,0,127,.45); --line-gold:rgba(255,204,0,.55);
+  --display:"Montserrat",sans-serif; --body:"Be Vietnam Pro",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:var(--body);color:var(--fg)}
+#fit{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1080px;height:1920px;transform-origin:center center;overflow:hidden;background:var(--bg)}
+#c{position:absolute;inset:0;width:1080px;height:1920px}
+.ui{position:absolute;z-index:3}
+
+/* Title Plaque */
+#plaque{
+  left:80px;right:80px;top:60px;height:140px;border:3px solid var(--gold);border-radius:26px;
+  background:linear-gradient(180deg,rgba(40,12,65,.92),rgba(15,5,25,.92));
+  box-shadow:0 0 35px rgba(255,0,127,.35), inset 0 0 30px rgba(255,204,0,.25);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+}
+#plaque::before,#plaque::after{content:"👑";position:absolute;top:50%;transform:translateY(-50%);font-size:38px}
+#plaque::before{left:28px}#plaque::after{right:28px}
+#title{font-family:var(--display);font-weight:900;font-size:50px;letter-spacing:.06em;color:var(--gold);text-transform:uppercase;text-shadow:0 2px 0 #3a0020,0 0 25px rgba(255,204,0,.45)}
+#subtitle{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:.1em;color:var(--blue);text-shadow:0 0 10px var(--blue)}
+
+/* Pills */
+#pills{top:222px;left:0;right:0;display:flex;justify-content:center;gap:20px}
+.pill{background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:10px 24px;font-size:30px;font-weight:700;display:flex;align-items:center;gap:12px;font-variant-numeric:tabular-nums}
+.pill small{font-size:18px;font-weight:600;color:var(--muted);line-height:1.05}
+.dot{width:16px;height:16px;border-radius:50%;background:#ff007f;box-shadow:0 0 14px #ff007f}
+
+/* Side Cards */
+.card{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:16px 20px;font-size:22px;line-height:1.35;backdrop-filter:blur(6px)}
+#guide{left:24px;top:320px;width:290px;border-color:var(--line)}
+#guide div+div{border-top:1px solid rgba(255,0,127,.3);margin-top:8px;padding-top:8px}
+#guide b{color:var(--pink)}
+
+#rightCol{right:24px;top:320px;width:320px;display:flex;flex-direction:column;gap:12px}
+#merit{text-align:center;border-color:var(--line-gold)}
+#merit h3{margin:0 0 8px;font-family:var(--display);font-size:24px;font-weight:800;color:var(--gold);letter-spacing:.05em}
+#merit ol{margin:0;padding:0;list-style:none;text-align:left;display:grid;gap:6px}
+#merit li{display:flex;justify-content:space-between;gap:8px;font-size:20px}
+#merit li span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#merit li span:last-child{color:var(--gold);font-variant-numeric:tabular-nums;font-weight:700}
+#merit .empty{color:var(--muted);text-align:center}
+
+/* Gift Banner */
+#gift{
+  left:60px;right:60px;top:320px;z-index:6;padding:26px 36px;text-align:center;border-radius:28px;
+  border:3px solid var(--gold);background:radial-gradient(ellipse at 50% 0%,rgba(160,20,90,.96),rgba(40,5,30,.96));
+  box-shadow:0 0 60px rgba(255,204,0,.55);opacity:0;transform:scale(.85);
+  transition:opacity .4s,transform .4s cubic-bezier(.2,1.4,.4,1);pointer-events:none;
+}
+#gift.show{opacity:1;transform:none}
+#gift .who{font-family:var(--display);font-weight:900;font-size:48px;color:var(--gold);text-shadow:0 0 15px var(--gold)}
+#gift .what{font-size:32px;margin-top:6px;font-weight:700}
+
+/* Unmute Button */
+#unmute{
+  position:absolute;z-index:9;left:50%;top:1500px;transform:translateX(-50%);font:700 34px var(--display);
+  padding:20px 42px;border-radius:24px;border:3px solid var(--gold);
+  background:linear-gradient(135deg,#ff007f,#9d00ff);color:#fff;cursor:pointer;
+  box-shadow:0 0 45px rgba(255,0,127,.8);
+}
+#flash{position:absolute;inset:0;z-index:5;background:#fff;opacity:0;pointer-events:none}
+#conn{position:absolute;z-index:4;right:16px;bottom:12px;font-size:18px;color:var(--muted);opacity:.6}
+</style>
+</head>
+<body>
+<div id="fit">
+  <div id="stage">
+    <canvas id="c" width="1080" height="1920"></canvas>
+    <div id="flash"></div>
+
+    <div class="ui" id="plaque">
+      <div id="title">VŨ TRƯỜNG CÕI MẠNG</div>
+      <div id="subtitle">CHÁY HẾT MÌNH ĐÊM NAY · QUẨY LÊN ANH EM ƠI</div>
+    </div>
+
+    <div class="ui" id="pills">
+      <div class="pill"><span class="dot"></span><span id="count">0/24</span><small>khách</small></div>
+      <div class="pill">🔥 <span id="hype">120</span><small>nhiệt</small></div>
+    </div>
+
+    <div class="ui card" id="guide">
+      <div>💬 <b>"di bar"</b> hoặc <b>"len do"</b> lên sàn</div>
+      <div>🥂 <b>"cung ly"</b>, <b>"quay"</b> biểu diễn</div>
+      <div>🤵 <b>"vest"</b>, <b>"dam"</b> đổi trang phục</div>
+      <div>🎁 Tặng quà: <b>Lên Bàn VIP & MC xướng tên</b></div>
+    </div>
+
+    <div class="ui" id="rightCol">
+      <div class="card" id="merit">
+        <h3>👑 BẢNG ĐẠI GIA</h3>
+        <ol id="meritList"><li class="empty">Chờ Chủ Tịch…</li></ol>
+      </div>
+    </div>
+
+    <div class="ui" id="gift">
+      <div class="who" id="giftWho">Dân Chơi</div>
+      <div class="what" id="giftWhat">vừa bao trọn vũ trường!</div>
+    </div>
+
+    <button id="unmute">🔊 BẬT ÂM THANH VŨ TRƯỜNG</button>
+    <div id="conn"></div>
+  </div>
+</div>
+
+<script type="module">
+import * as T from "/assets/vendor/three-bundle.js";
+// Stage Resize
+function resize(){
+  const s = document.getElementById('stage'), sw=1080, sh=1920;
+  const k = Math.min(window.innerWidth/sw, window.innerHeight/sh);
+  s.style.transform = `translate(-50%, -50%) scale(${k})`;
+}
+window.addEventListener('resize', resize); resize();
+
+
+// HUD Updates
+function updateCount(){ document.getElementById('count').textContent = `${Math.min(cap, visitors.size)}/${cap}`; }
+function renderMerit(){
+  const top = [...visitors.values()].filter(v => v.coins > 0).sort((a,b) => b.coins - a.coins).slice(0, 5);
+  const ol = document.getElementById('meritList'); ol.innerHTML = '';
+  if (!top.length){ ol.innerHTML = '<li class="empty">Chờ Chủ Tịch…</li>'; return; }
+  top.forEach((v, i) => {
+    const li = document.createElement('li');
+    const badge = i === 0 ? '👑 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : `${i+1}. `;
+    li.innerHTML = `<span>${badge}${v.name}</span><span>${v.coins} 💎</span>`;
+    ol.append(li);
+  });
+}
+
+let giftHide = null;
+function showGift(m){
+  document.getElementById('giftWho').textContent = m.name;
+  document.getElementById('giftWhat').textContent = `vừa tặng ${m.count > 1 ? m.count + 'x ' : ''}${m.giftName.toUpperCase()} · ${m.total} 💎`;
+  const el = document.getElementById('gift'); el.classList.add('show');
+  clearTimeout(giftHide); giftHide = setTimeout(() => el.classList.remove('show'), m.tier >= 3 ? 9000 : 5000);
+}
+
+// Audio Management
+let AC = null, settings = { music: true };
+const bgm = new Audio('/assets/music/bgm_club.mp3');
+bgm.loop = true;
+
+document.getElementById('unmute').onclick = e => {
+  e.currentTarget.remove();
+  startAudio();
+};
+
+function startAudio(){
+  try {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+  } catch(e){}
+  bgm.volume = settings.music ? 0.45 : 0;
+  bgm.play().then(() => console.log('BGM playing!')).catch(e => console.log('BGM error:', e));
+  hookAnalyser();
+  soundClink();
+}
+
+function playSfx(name){
+  try {
+    const s = new Audio(`/assets/sfx/${name}.mp3`);
+    s.volume = 0.9;
+    s.play().catch(e => console.log('SFX play error:', e));
+  } catch(e){}
+}
+
+function soundClink(){
+  if (!AC) return;
+  const t = AC.currentTime;
+  for (const f of [2600, 5200]){
+    const o = AC.createOscillator();
+    const g = AC.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.35, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.85);
+    o.connect(g); g.connect(AC.destination);
+    o.start(t); o.stop(t + 0.85);
+  }
+}
+
+function duck(on){
+  if (!bgm) return;
+  bgm.volume = on ? 0.12 : (settings.music ? 0.45 : 0);
+}
+
+const ttsQ = []; let ttsPlaying = false;
+function queueTTS(url){ ttsQ.push(url); playTTS(); }
+function playTTS(){
+  if (ttsPlaying || !ttsQ.length) return;
+  ttsPlaying = true;
+  const url = ttsQ.shift(); const el = new Audio(url);
+  el.volume = 1.0;
+  el.onplay = () => duck(true);
+  el.onended = el.onerror = () => { duck(false); ttsPlaying = false; setTimeout(playTTS, 300); };
+  el.play().catch(() => { ttsPlaying = false; });
+}
+
+
+/* ======================= 3D SCENE (Three.js) ======================= */
+const W = 1080, H = 1920, FOV = 66, CAMZ = 13;
+const rnd = (a = 1) => (Math.random() - .5) * 2 * a;
+const halfW = z => (CAMZ - z) * Math.tan(FOV * Math.PI / 360) * (W / H);
+
+const renderer = new T.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
+const scene = new T.Scene();
+scene.background = new T.Color(0x07030c);
+scene.fog = new T.FogExp2(0x14051f, 0.028);
+const cam = new T.PerspectiveCamera(FOV, W / H, 0.1, 90);
+
+const composer = new T.EffectComposer(renderer);
+composer.setSize(W, H);
+composer.addPass(new T.RenderPass(scene, cam));
+const bloom = new T.UnrealBloomPass(new T.Vector2(W, H), 0.8, 0.55, 0.85);
+composer.addPass(bloom);
+composer.addPass(new T.OutputPass());
+
+const std = (c, o = {}) => new T.MeshStandardMaterial({ color: c, roughness: .55, metalness: .25, ...o });
+const glow = (c, k = 2) => { const m = new T.MeshBasicMaterial({ color: c, toneMapped: false }); m.color.multiplyScalar(k); return m; };
+const box = (w, h, d, mat, x, y, z, parent = scene) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); parent.add(m); return m; };
+
+/* --- lights --- */
+scene.add(new T.AmbientLight(0x3a2060, 1.2));
+scene.add(new T.HemisphereLight(0xff5fb0, 0x101040, 0.6));
+const pinkL = new T.PointLight(0xff007f, 90, 22, 1.6); scene.add(pinkL);
+const cyanL = new T.PointLight(0x00f0ff, 90, 22, 1.6); scene.add(cyanL);
+
+/* --- room --- */
+const floor = new T.Mesh(new T.PlaneGeometry(40, 40), std(0x0a0612, { roughness: .2, metalness: .75 }));
+floor.rotation.x = -Math.PI / 2; scene.add(floor);
+box(40, 14, .5, std(0x120820), 0, 7, -7.4);                       // back wall
+box(.5, 14, 40, std(0x120820), -9, 7, 0); box(.5, 14, 40, std(0x120820), 9, 7, 0); // side walls
+box(40, .5, 40, std(0x0b0614), 0, 10, 0);                          // ceiling
+for (const x of [-8.6, 8.6]) for (const y of [2.2, 5.5]) box(.1, .12, 40, glow(x < 0 ? 0xff007f : 0x00f0ff, 2.2), x, y, 0);
+box(18, .12, .12, glow(0x9d00ff, 2.2), 0, 8.4, -7.1);
+
+// dance-floor tiles (reactive)
+const TX = 7, TZ = 9, tiles = new T.InstancedMesh(new T.BoxGeometry(.92, .06, .92), new T.MeshBasicMaterial({ toneMapped: false }), TX * TZ);
+const tm = new T.Object3D(), tc = new T.Color();
+for (let i = 0; i < TX; i++) for (let j = 0; j < TZ; j++) { tm.position.set((i - (TX - 1) / 2) * 1, .03, -2.6 + j); tm.updateMatrix(); tiles.setMatrixAt(i * TZ + j, tm.matrix); tiles.setColorAt(i * TZ + j, tc.setRGB(.1, 0, .1)); }
+scene.add(tiles);
+
+// stage + DJ booth + LED screen
+box(7, .5, 3, std(0x15091f, { metalness: .6 }), 0, .25, -5.3);
+box(7.1, .08, 3.1, glow(0xff007f, 2), 0, .52, -5.3);
+box(3.2, 1.1, 1, std(0x0e0616, { metalness: .7 }), 0, 1.05, -5.7);
+box(3.25, .08, 1.05, glow(0x00f0ff, 2.4), 0, 1.62, -5.7);
+for (const x of [-3.7, 3.7]) { box(1.2, 2.6, 1.2, std(0x0a0510), x, 1.8, -5.6); box(.9, .9, .05, glow(0x9d00ff, 1.6), x, 2.6, -4.97); box(.9, .9, .05, glow(0x9d00ff, 1.6), x, 1.2, -4.97); }
+const screenC = document.createElement('canvas'); screenC.width = 512; screenC.height = 320;
+const screenTex = new T.CanvasTexture(screenC); screenTex.colorSpace = T.SRGBColorSpace;
+const screenMat = new T.MeshBasicMaterial({ map: screenTex, toneMapped: false });
+const screen = new T.Mesh(new T.PlaneGeometry(6.4, 4), screenMat); screen.position.set(0, 4.3, -7.1); scene.add(screen);
+box(6.7, 4.3, .1, glow(0xff007f, 1.6), 0, 4.3, -7.2);
+
+// bar counters + bottle shelves
+const bottles = new T.InstancedMesh(new T.CylinderGeometry(.09, .09, .5, 8), new T.MeshBasicMaterial({ toneMapped: false }), 56);
+let bi = 0;
+for (const side of [-1, 1]) {
+  box(4.2, 1.2, 1.1, std(0x1a0b2a, { metalness: .5, roughness: .3 }), side * 5.2, .6, -6);
+  box(4.3, .08, 1.2, glow(side < 0 ? 0xff007f : 0x00f0ff, 2), side * 5.2, 1.22, -6);
+  for (const y of [2.4, 3.4]) { box(4.2, .06, .5, glow(0xffcc00, 1.4), side * 5.2, y - .3, -6.9); for (let k = 0; k < 14; k++) { tm.position.set(side * 5.2 + (k - 6.5) * .28, y, -6.9); tm.updateMatrix(); bottles.setMatrixAt(bi, tm.matrix); bottles.setColorAt(bi++, tc.setHSL(Math.random(), .9, .55).multiplyScalar(1.6)); } }
+}
+scene.add(bottles);
+
+// VIP sofas
+const sofa = (side, z) => { const g = new T.Group(); g.position.set(side * 3.9, 0, z); g.rotation.y = -side * .5;
+  box(1.5, .5, 2.2, std(0x3a0a3a, { roughness: .4 }), 0, .25, 0, g); box(.3, 1.0, 2.2, std(0x3a0a3a), side * .6, .7, 0, g); box(1.52, .05, 2.22, glow(0xffcc00, 1.6), 0, .52, 0, g); scene.add(g); };
+sofa(-1, .2); sofa(-1, 1.9); sofa(1, .2); sofa(1, 1.9);
+
+// laser rig
+const lasers = [];
+const beamGeo = new T.CylinderGeometry(.02, .45, 16, 10, 1, true); beamGeo.translate(0, -8, 0);
+for (let i = 0; i < 8; i++) {
+  const col = i % 2 ? 0xff007f : 0x00f0ff;
+  const m = new T.Mesh(beamGeo, new T.MeshBasicMaterial({ color: col, transparent: true, opacity: .16, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide, toneMapped: false }));
+  m.position.set((i - 3.5) * 2.2, 9.6, -3 + (i % 2) * 3); m.userData = { ph: i * .8, sp: .5 + (i % 3) * .2 }; scene.add(m); lasers.push(m);
+  box(.4, .3, .4, glow(col, 2), m.position.x, 9.7, m.position.z);
+}
+const followSpot = new T.Mesh(new T.CylinderGeometry(.15, 1.1, 10, 16, 1, true).translate(0, -5, 0), new T.MeshBasicMaterial({ color: 0xffd98a, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide, toneMapped: false }));
+followSpot.position.y = 10; scene.add(followSpot);
+
+/* --- characters --- */
+const G = { torso: new T.CapsuleGeometry(.26, .5, 4, 10), head: new T.SphereGeometry(.25, 16, 12), arm: new T.CapsuleGeometry(.07, .45, 3, 6), leg: new T.CapsuleGeometry(.1, .4, 3, 6),
+  skirt: new T.ConeGeometry(.52, .8, 14), hair: new T.SphereGeometry(.27, 14, 10, 0, Math.PI * 2, 0, Math.PI * .56), ring: new T.RingGeometry(.55, .8, 32), glass: new T.CylinderGeometry(.07, .04, .22, 8), bottle: new T.CylinderGeometry(.06, .06, .5, 8), flame: new T.ConeGeometry(.2, .55, 8) };
+const SKIN = [0xf1c7a0, 0xe0ac84, 0xc98c64, 0xf7d6b8];
+function hash(s) { let h = 0; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); }
+
+function labelSprite(w, h, sx, sy, y) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const tex = new T.CanvasTexture(c); tex.colorSpace = T.SRGBColorSpace;
+  const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, transparent: true, depthTest: false, toneMapped: false }));
+  sp.scale.set(sx, sy, 1); sp.position.y = y; sp.renderOrder = 10; sp.userData = { ctx: c.getContext('2d'), tex, w, h }; return sp;
+}
+function pill(ctx, x, y, w, h, fill, stroke) {
+  const r = h / 2; ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); if (stroke) { ctx.lineWidth = 5; ctx.strokeStyle = stroke; ctx.stroke(); }
+}
+function drawName(v) {
+  const { ctx, tex, w, h } = v.nameS.userData; ctx.clearRect(0, 0, w, h);
+  const vip = v.seat?.vip || v.coins >= 30, av = v.img && v.img.complete && v.img.naturalWidth;
+  ctx.font = '700 40px "Be Vietnam Pro",sans-serif';
+  const tw = Math.min(ctx.measureText(v.name).width, 340), pw = tw + 44 + (av ? 62 : 0), x = (w - pw) / 2;
+  pill(ctx, x, 12, pw, 72, vip ? 'rgba(50,25,0,.92)' : 'rgba(18,10,30,.85)', vip ? '#ffcc00' : 'rgba(255,0,127,.8)');
+  if (av) { ctx.save(); ctx.beginPath(); ctx.arc(x + 44, 48, 26, 0, 7); ctx.clip(); try { ctx.drawImage(v.img, x + 18, 22, 52, 52); } catch { } ctx.restore(); }
+  ctx.fillStyle = vip ? '#ffe680' : '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(v.name, x + pw / 2 + (av ? 31 : 0), 50, 340); tex.needsUpdate = true;
+}
+function drawBubble(v, text, gold) {
+  const { ctx, tex, w, h } = v.bubS.userData; ctx.clearRect(0, 0, w, h);
+  ctx.font = '600 38px "Be Vietnam Pro",sans-serif'; let t = text; while (ctx.measureText(t).width > 540 && t.length > 4) t = t.slice(0, -2); if (t !== text) t += '…';
+  const pw = ctx.measureText(t).width + 50;
+  pill(ctx, (w - pw) / 2, 10, pw, 80, gold ? 'rgba(255,230,120,.97)' : 'rgba(255,255,255,.96)', gold ? '#ffcc00' : null);
+  ctx.fillStyle = gold ? '#4a2500' : '#1a0d2e'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, w / 2, 52); tex.needsUpdate = true; v.bubS.visible = true;
+}
+
+function makeAvatar(p) {
+  const hs = hash(p.id), woman = p.skin === 'woman', g = new T.Group(), body = new T.Group(); g.add(body);
+  const skin = std(SKIN[hs % 4], { roughness: .7 }), hue = (hs % 360) / 360;
+  const cloth = woman ? std(new T.Color().setHSL(hue, .75, .5), { roughness: .35 }) : std(new T.Color().setHSL(hue, .25, .13), { roughness: .4 });
+  const add = (geo, mat, x, y, z, par = body) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); par.add(m); return m; };
+  add(G.torso, cloth, 0, 1.05, 0); add(G.head, skin, 0, 1.85, 0);
+  if (woman) { add(G.skirt, cloth, 0, .62, 0); add(G.hair, std(hs % 2 ? 0x2a1208 : 0x0d0d12), 0, 1.9, -.02).scale.set(1.05, 1.2, 1.1); add(G.leg, skin, -.12, .28, 0); add(G.leg, skin, .12, .28, 0); }
+  else { add(G.leg, std(0x101018), -.12, .3, 0); add(G.leg, std(0x101018), .12, .3, 0); add(G.hair, std(0x15110e), 0, 1.9, -.02); add(new T.BoxGeometry(.08, .4, .05), glow(new T.Color().setHSL(hue, 1, .5), 1.3), 0, 1.15, .27); }
+  const mkArm = s => { const pv = new T.Group(); pv.position.set(s * .36, 1.38, 0); add(G.arm, cloth, 0, -.3, 0, pv); body.add(pv); return pv; };
+  const aL = mkArm(-1), aR = mkArm(1);
+  const glass = add(G.glass, glow(0xffe08a, 1.8), 0, -.68, 0, aR), bottle = add(G.bottle, glow(0x7dffb0, 1.5), 0, -.75, 0, aR), flame = add(G.flame, glow(0xff6a00, 2.2), 0, 2.45, 0);
+  glass.visible = bottle.visible = flame.visible = false;
+  const ring = new T.Mesh(G.ring, new T.MeshBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0, side: T.DoubleSide, toneMapped: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .04; g.add(ring);
+  g.userData = { body, aL, aR, glass, bottle, flame, ring };
+  return g;
+}
+
+/* --- state & layout --- */
+let cap = 24, seats = [], order = [], focusId = null, camPush = 0, spark = 0;
+const visitors = new Map();
+function layout(n) {
+  cap = n; seats = [];
+  for (const [x, z, y] of [[-3.4, .2, .5], [-3.4, 1.9, .5], [3.4, .2, -.5], [3.4, 1.9, -.5]]) seats.push({ x, z, yaw: -Math.sign(x) * .6, vip: 1, y: .5 });
+  const rows = n <= 24 ? 4 : n <= 36 ? 5 : 7, per = Math.ceil((n - 4) / rows);
+  for (let r = 0; r < rows; r++) {
+    const z = -1.6 + r / (rows - 1) * 5.6, span = Math.min(halfW(z) * .6, 2.7);
+    for (let c = 0; c < per && seats.length < n; c++) seats.push({ x: (per === 1 ? 0 : (c / (per - 1) - .5) * 2 * span) + (r % 2 ? .18 : -.18), z, yaw: rnd(.35), y: 0 });
+  }
+  reseat();
+}
+function reseat() {
+  order = order.filter(id => visitors.has(id)).sort((a, b) => (visitors.get(b).coins || 0) - (visitors.get(a).coins || 0));
+  const sc = cap > 36 ? .72 : cap > 24 ? .82 : .92;
+  order.forEach((id, i) => { const v = visitors.get(id), s = seats[i]; if (!v || !s) return; v.seat = s; v.sc = sc; v.g.scale.setScalar(sc); drawName(v); });
+}
+function addVisitor(p) {
+  if (visitors.has(p.id)) { const v = visitors.get(p.id); Object.assign(v, { name: p.name, coins: p.coins }); if (p.skin !== v.skin) { v.skin = p.skin; rebuild(v); } drawName(v); return; }
+  const v = { ...p, focus: 0, glow: 0, action: null, actionTimer: 0, phase: Math.random() * 6.28, bubbleUntil: 0 };
+  v.g = makeAvatar(v); v.g.position.set(rnd(1.2), 0, 9.5); v.g.rotation.y = Math.PI;
+  v.nameS = labelSprite(512, 96, 3.3, .62, 2.75); v.bubS = labelSprite(640, 100, 4.2, .66, 3.5); v.bubS.visible = false; v.g.add(v.nameS, v.bubS);
+  if (p.avatar) { v.img = new Image(); v.img.crossOrigin = 'anonymous'; v.img.onload = () => drawName(v); v.img.src = p.avatar; }
+  scene.add(v.g); visitors.set(p.id, v); order.push(p.id); reseat();
+}
+function rebuild(v) { const old = v.g, nw = makeAvatar(v); nw.position.copy(old.position); nw.rotation.copy(old.rotation); nw.scale.copy(old.scale); nw.add(v.nameS, v.bubS); scene.remove(old); scene.add(nw); v.g = nw; }
+function removeVisitor(id) { const v = visitors.get(id); if (v) scene.remove(v.g); visitors.delete(id); reseat(); }
+
+// DJ
+const dj = { id: 'dj', skin: 'man', coins: 0, focus: 0, glow: 0, actionTimer: 0, phase: 0, action: null, g: null }; dj.g = makeAvatar(dj); dj.g.position.set(0, .5, -5.9); dj.g.scale.setScalar(1.15); scene.add(dj.g);
+
+/* --- particles --- */
+const NP = 800, pm = new T.InstancedMesh(new T.BoxGeometry(.14, .14, .02), new T.MeshBasicMaterial({ toneMapped: false }), NP);
+pm.instanceMatrix.setUsage(T.DynamicDrawUsage); pm.frustumCulled = false; pm.setColorAt(0, tc.setRGB(0, 0, 0)); scene.add(pm);
+const P = Array.from({ length: NP }, () => ({ life: 0, max: 1, p: new T.Vector3(), v: new T.Vector3(), c: new T.Color(), sz: 1, g: 9, r: Math.random() * 6 })); let pIdx = 0;
+function emit(x, y, z, vx, vy, vz, color, life, sz = 1, g = 9) { const q = P[pIdx = (pIdx + 1) % NP]; q.life = q.max = life; q.p.set(x, y, z); q.v.set(vx, vy, vz); q.c.set(color).multiplyScalar(1.6); q.sz = sz; q.g = g; }
+const hearts = [];
+const heartTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 96; const x = c.getContext('2d'); x.font = '80px serif'; x.fillStyle = '#ff2d8e'; x.textAlign = 'center'; x.fillText('♥', 48, 76); const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t; })();
+function addHearts(v) { for (let i = 0; i < 4; i++) { const s = new T.Sprite(new T.SpriteMaterial({ map: heartTex, transparent: true, depthTest: false, toneMapped: false })); s.position.copy(v.g.position); s.position.y += 2.2; s.scale.setScalar(.55); s.renderOrder = 11; scene.add(s); hearts.push({ s, v: new T.Vector3(rnd(.8), 2.4 + Math.random() * 1.6, rnd(.3)), life: 1.9 }); } }
+function fireConfetti() { const cols = [0xff007f, 0x00f0ff, 0xffcc00, 0xffffff, 0x9d00ff]; for (let i = 0; i < 160; i++) emit(rnd(2), 7.5, -2 + rnd(2), rnd(5), 2 + Math.random() * 5, Math.random() * 5, cols[i % 5], 3.6, 1, 4); }
+
+let strobeAlpha = 0, strobeFrenzy = 0; const flashEl = document.getElementById('flash');
+function triggerStrobe(frenzy) { if (frenzy) { strobeFrenzy = 3.5; camPush = 1; } else strobeAlpha = .7; }
+
+/* --- audio reactive --- */
+let an = null, fb = null, bass = 0;
+function hookAnalyser() { try { const src = AC.createMediaElementSource(bgm); an = AC.createAnalyser(); an.fftSize = 256; src.connect(an); an.connect(AC.destination); fb = new Uint8Array(an.frequencyBinCount); } catch (e) { } }
+
+/* --- websocket --- */
+function connect() {
+  const ws = new WebSocket(`ws://${location.host}/ws?role=overlay`), st = document.getElementById('conn');
+  ws.onopen = () => { st.textContent = ''; };
+  ws.onclose = () => { st.textContent = 'Mất kết nối server… đang kết nối lại'; setTimeout(connect, 2000); };
+  const setTitle = () => { document.getElementById('title').textContent = settings.title || 'VŨ TRƯỜNG CÕI MẠNG'; document.getElementById('subtitle').textContent = settings.subtitle || 'CHÁY HẾT MÌNH ĐÊM NAY'; };
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    switch (m.t) {
+      case 'state': Object.assign(settings, m.settings); setTitle(); document.getElementById('hype').textContent = m.hypeScore || 120;
+        for (const v of visitors.values()) scene.remove(v.g); visitors.clear(); order = []; layout(m.cap || 24);
+        for (const p of m.viewers) addVisitor(p); updateCount(); renderMerit(); break;
+      case 'settings': Object.assign(settings, m.settings); setTitle(); if (m.cap !== cap) { layout(m.cap); updateCount(); } break;
+      case 'join': if (m.cap !== cap) layout(m.cap); addVisitor(m.v); updateCount(); break;
+      case 'leave': removeVisitor(m.id); updateCount(); renderMerit(); break;
+      case 'skin': { const v = visitors.get(m.id); if (v) { v.skin = m.skin; rebuild(v); v.glow = 1.5; } } break;
+      case 'chat': { const v = visitors.get(m.id);
+        if (v) { v.focus = 6; focusId = v.id; v.bubbleUntil = performance.now() + 6500; drawBubble(v, m.text, v.seat?.vip);
+          if (m.action) { v.action = m.action; v.actionTimer = 4;
+            if (m.action === 'toast') { soundClink(); const f = [...visitors.values()].find(o => o.id !== v.id && o.g.position.distanceTo(v.g.position) < 1.8); if (f) { f.action = 'toast'; f.actionTimer = 4; } }
+            else if (m.action === 'champagne') playSfx('champagne'); else if (m.action === 'fire') playSfx('scratch'); } }
+        document.getElementById('hype').textContent = m.hypeScore; } break;
+      case 'like': { const v = visitors.get(m.id); if (v) addHearts(v); document.getElementById('hype').textContent = m.hypeScore; } break;
+      case 'gift': { const v = visitors.get(m.id);
+        if (v) { v.coins = m.total; v.focus = 8; focusId = v.id; v.glow = 2; v.action = 'champagne'; v.actionTimer = 6; v.bubbleUntil = performance.now() + 10000; drawBubble(v, '🥂 ' + m.giftName, true); reseat(); }
+        showGift(m); renderMerit();
+        if (m.tier >= 3) { triggerStrobe(true); fireConfetti(); playSfx('airhorn'); } else if (m.tier >= 2) { triggerStrobe(false); fireConfetti(); playSfx('champagne'); } else playSfx('champagne');
+        document.getElementById('hype').textContent = m.hypeScore; } break;
+      case 'tts': queueTTS(m.url); break;
+      case 'focus': { const v = visitors.get(m.id); if (v) { v.focus = 8; focusId = v.id; v.glow = 2; v.action = 'toast'; v.actionTimer = 4; soundClink(); } } break;
+      case 'strobe': playSfx('airhorn'); triggerStrobe(true); break;
+      case 'airhorn': playSfx('airhorn'); triggerStrobe(false); break;
+      case 'smoke': for (let i = 0; i < 120; i++) emit(rnd(3.5), .2, rnd(3), rnd(1.5), 1.8 + Math.random() * 2.5, rnd(1.5), 0xd8b4ff, 2.8, 1.4, .5); break;
+      case 'toast': soundClink(); for (const v of visitors.values()) { v.action = 'toast'; v.actionTimer = 4; } break;
+    }
+  };
+}
+connect();
+
+/* --- animate a character --- */
+function animate(v, dt, t, phase) {
+  const u = v.g.userData, vip = v.seat?.vip || v.coins >= 30;
+  if (v.seat) { const tgt = v.tx ??= new T.Vector3(); tgt.set(v.seat.x, v.seat.y, v.seat.z);
+    const d = tgt.clone().sub(v.g.position), dist = d.length(); v.walking = dist > .12;
+    if (dist > .01) v.g.position.addScaledVector(d, Math.min(1, dt * 2.2 / Math.max(dist, .5) * (v.walking ? 2.2 : 3)));
+    const wantYaw = v.walking ? Math.atan2(d.x, d.z) : v.seat.yaw; let dy = wantYaw - v.g.rotation.y; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); v.g.rotation.y += dy * Math.min(1, dt * 6); }
+  v.focus = Math.max(0, v.focus - dt); v.glow = Math.max(0, v.glow - dt * .5); v.actionTimer = Math.max(0, v.actionTimer - dt); if (v.actionTimer <= 0) v.action = null;
+  const frenzy = v.focus > 0 || strobeFrenzy > 0, ph = phase + v.phase, amp = (v.walking ? .16 : .06) + bass * .12 + (frenzy ? .14 : 0);
+  u.body.position.y = Math.abs(Math.sin(ph)) * amp; u.body.rotation.z = Math.sin(ph) * (frenzy ? .1 : .06);
+  const a = v.action; let rL = -(.35 + Math.sin(ph * .5) * .5), rR = .35 + Math.sin(ph * .5 + 1.5) * .5;
+  if (a === 'toast' || a === 'champagne') rR = 2.7 + Math.sin(t * 6) * .12; else if (a === 'fire') { rR = 2.8 + Math.sin(t * 18) * .25; rL = -2.8 - Math.sin(t * 18 + 1) * .25; } else if (frenzy) { rL = -2.2 + Math.sin(ph * 2) * .4; rR = 2.2 - Math.sin(ph * 2) * .4; }
+  u.aL.rotation.z += (rL - u.aL.rotation.z) * Math.min(1, dt * 10); u.aR.rotation.z += (rR - u.aR.rotation.z) * Math.min(1, dt * 10);
+  u.glass.visible = a === 'toast'; u.bottle.visible = a === 'champagne'; u.flame.visible = a === 'fire';
+  if (a === 'fire') u.flame.scale.set(1 + Math.sin(t * 20) * .2, 1 + Math.sin(t * 27) * .3, 1);
+  if (a === 'champagne' && (v.spk = (v.spk || 0) - dt) < 0) { v.spk = .05; const p = v.g.position, s = v.sc || 1; emit(p.x + .45 * s, p.y + 3.1 * s, p.z, rnd(1.2), 3 + Math.random() * 2, rnd(.6), 0xffd98a, 1.2, .7, 6); }
+  u.ring.material.opacity = Math.min(1, v.glow * .8); u.ring.material.color.set(vip ? 0xffcc00 : 0xff007f);
+  if (v.bubS?.visible && performance.now() > v.bubbleUntil) v.bubS.visible = false;
+}
+
+/* --- main loop --- */
+let last = performance.now(); const dummy = new T.Object3D();
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min((now - last) / 1000, .05); last = now; const t = now / 1000, phase = t * 128 / 60 * Math.PI;
+  let target;
+  if (an) { an.getByteFrequencyData(fb); target = (fb[1] + fb[2] + fb[3] + fb[4] + fb[5]) / (5 * 255); target = Math.pow(target, 1.6) * 1.4; }
+  else target = Math.pow(Math.abs(Math.sin(phase)), 6) * .6;
+  bass += (Math.min(1, target) - bass) * .35;
+
+  // floor tiles
+  for (let i = 0; i < TX; i++) for (let j = 0; j < TZ; j++) { const w = (Math.sin(t * 2 + i * .7 + j * .5) + 1) / 2; tc.setHSL((t * .08 + (i + j) * .05) % 1, 1, .06 + w * .1 + bass * .3 * ((i + j) % 2 ? 1 : .5)); tiles.setColorAt(i * TZ + j, tc); }
+  tiles.instanceColor.needsUpdate = true;
+  // LED screen
+  { const c = screenC.getContext('2d'); c.fillStyle = '#12001f'; c.fillRect(0, 0, 512, 320);
+    for (let k = 0; k < 3; k++) { c.strokeStyle = `hsl(${(t * 60 + k * 90) % 360},100%,60%)`; c.lineWidth = 8; c.beginPath(); c.arc(256, 160, 40 + k * 38 + bass * 60, 0, 7); c.stroke(); }
+    c.fillStyle = '#fff'; c.font = '900 54px Montserrat,sans-serif'; c.textAlign = 'center'; c.fillText('BAR', 256, 178); screenTex.needsUpdate = true; }
+  // lasers & lights
+  lasers.forEach(m => { const { ph, sp } = m.userData; m.rotation.z = Math.sin(t * sp + ph) * .7; m.rotation.x = Math.cos(t * sp * .8 + ph) * .5; m.material.opacity = .1 + bass * .22 + (strobeFrenzy > 0 ? .15 : 0); });
+  pinkL.position.set(Math.sin(t * .9) * 5, 5, Math.cos(t * .7) * 3); cyanL.position.set(Math.cos(t * .8) * 5, 5, Math.sin(t * .6) * 3);
+  pinkL.intensity = 70 + bass * 140; cyanL.intensity = 70 + bass * 140;
+
+  // people
+  animate(dj, dt, t, phase); dj.g.userData.aL.rotation.z = -2.4 + Math.sin(phase * 2) * .3; dj.g.userData.aR.rotation.z = 2.4 - Math.sin(phase * 2) * .3;
+  let fv = null; for (const v of visitors.values()) { animate(v, dt, t, phase); if (v.id === focusId && v.focus > 0) fv = v; }
+  if (fv) { followSpot.position.x += (fv.g.position.x - followSpot.position.x) * .2; followSpot.position.z += (fv.g.position.z - followSpot.position.z) * .2; followSpot.material.opacity = Math.min(.35, fv.focus * .12); } else followSpot.material.opacity = 0;
+
+  // particles
+  for (let i = 0; i < NP; i++) { const q = P[i];
+    if (q.life > 0) { q.life -= dt; q.v.y -= q.g * dt; q.p.addScaledVector(q.v, dt); dummy.position.copy(q.p); dummy.rotation.set(q.r * q.life * 3, q.r * q.life * 5, 0); dummy.scale.setScalar(q.sz * Math.min(1, q.life * 3)); pm.setColorAt(i, q.c); }
+    else dummy.scale.setScalar(0);
+    dummy.updateMatrix(); pm.setMatrixAt(i, dummy.matrix); }
+  pm.instanceMatrix.needsUpdate = true; pm.instanceColor.needsUpdate = true;
+  for (let i = hearts.length - 1; i >= 0; i--) { const h = hearts[i]; h.life -= dt; h.s.position.addScaledVector(h.v, dt); h.s.material.opacity = Math.max(0, h.life / 1.9); if (h.life <= 0) { scene.remove(h.s); h.s.material.dispose(); hearts.splice(i, 1); } }
+
+  // strobe flash (DOM overlay)
+  let fl = 0;
+  if (strobeFrenzy > 0) { strobeFrenzy -= dt; fl = Math.sin(t * 30) > 0 ? .35 : 0; }
+  else if (strobeAlpha > 0) { strobeAlpha = Math.max(0, strobeAlpha - dt * 2); fl = strobeAlpha * .4; }
+  flashEl.style.opacity = fl;
+  bloom.strength = .75 + bass * .55 + fl * 1.5;
+
+  // camera
+  camPush = Math.max(0, camPush - dt * .5);
+  cam.position.set(Math.sin(t * .15) * 1.3 + rnd(camPush * .08), 5.6 + Math.sin(t * .1) * .25 + rnd(camPush * .08), CAMZ - camPush * 1.2 + bass * .15);
+  cam.lookAt(0, 1.5, 0);
+  composer.render();
+}
+layout(24);
+requestAnimationFrame(frame);
+
+</script>
+</body>
+</html>

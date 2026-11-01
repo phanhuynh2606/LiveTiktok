@@ -519,7 +519,11 @@ table.guest-table td:last-child {
     </div>
     <button class="btn-launch-overlay" id="btnOverlay">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM5 15h14v3H5z"/></svg>
-      Mở Overlay 9:16
+      Mở Overlay 2D
+    </button>
+    <button class="btn-launch-overlay" id="btnOverlay3D" style="border-color: var(--neon-cyan);">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 7.3L5.26 6 12 2.7 18.74 6 12 9.3zm-1 2.43l-8-4v8.27l8 4v-8.27zm2 8.27l8-4V7.73l-8 4V20z"/></svg>
+      Mở Overlay 3D
     </button>
   </div>
 </header>
@@ -885,6 +889,7 @@ $('btnConnect').onclick = () => send('connect', { uniqueId: $('uid').value });
 $('uid').onkeydown = e => { if (e.key==='Enter') send('connect', { uniqueId: $('uid').value }); };
 $('btnDisconnect').onclick = () => send('disconnect');
 $('btnOverlay').onclick = () => window.open('/live/overlay.html', 'overlay916', 'width=540,height=960');
+$('btnOverlay3D').onclick = () => window.open('/live/overlay3d.html', 'overlay3d', 'width=540,height=960');
 $('btnChat').onclick = () => send('chat', { name: $('simName').value, text: $('simText').value });
 document.querySelectorAll('[data-chat]').forEach(b => b.onclick = () => send('chat', { name: $('simName').value, text: b.dataset.chat }));
 document.querySelectorAll('[data-gift]').forEach(b => b.onclick = () => send('gift', { name: $('simName').value, gift: b.dataset.gift, diamonds: +b.dataset.dia, count: 1 }));

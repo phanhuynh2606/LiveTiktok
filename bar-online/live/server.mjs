@@ -417,6 +417,7 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n======================================================`);
   console.log(`🍸 VŨ TRƯỜNG CÕI MẠNG ĐÃ MỞ CỬA TẠI PORT ${PORT}`);
   console.log(`👉 Bảng điều khiển:                 http://localhost:${PORT}/live/control.html`);
-  console.log(`👉 Overlay 9:16 (OBS/TikTok Studio): http://localhost:${PORT}/live/overlay.html`);
+  console.log(`👉 Overlay 2D (OBS/TikTok Studio):  http://localhost:${PORT}/live/overlay.html`);
+  console.log(`👉 Overlay 3D (Three.js WebGL):     http://localhost:${PORT}/live/overlay3d.html`);
   console.log(`======================================================\n`);
 });
