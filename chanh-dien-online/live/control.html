@@ -79,6 +79,7 @@ button.red{background:var(--red);border-color:#b84a33}
       <button data-chat="hoa sen">🪷 Dâng hoa sen (10 xu)</button>
       <button data-chat="hào quang">✨ Hào quang</button>
       <button data-chat="rải hoa">🌸 Rải hoa</button>
+      <button id="btnTestLike">❤️ Thả 50 tim</button>
     </div>
     <label>Đổi hình nhân vật</label>
     <div class="row">
@@ -129,6 +130,7 @@ button.red{background:var(--red);border-color:#b84a33}
     <div class="row">
       <label>Nhịp mõ (BPM)<input id="moBpm" type="number" min="20" max="120" value="52"></label>
       <label>Đọc kinh mỗi (phút)<input id="chantEveryMin" type="number" min="1" max="60" value="3"></label>
+      <label>Mốc tim gõ chuông (mỗi N tim)<input id="likeMilestone" type="number" min="0" step="50" value="100"></label>
     </div>
     <div class="row"><button id="btnBell">🔔 Thỉnh chuông</button><button id="btnMo">Gõ mõ</button></div>
     <h2>Cảnh</h2>
@@ -152,7 +154,7 @@ const $ = id => document.getElementById(id);
 let ws = null;
 const send = (cmd, extra={}) => ws?.readyState===1 && ws.send(JSON.stringify({ t:'ctl', cmd, ...extra }));
 function logLine(s){ const el=$('log'); el.textContent += s + '\n'; el.scrollTop = el.scrollHeight; }
-const SETTING_IDS = ['voice','pitch','rate','music','mo','autoChant','moBpm','chantEveryMin','title','subtitle','seatMode','joinOnEnter'];
+const SETTING_IDS = ['voice','pitch','rate','music','mo','autoChant','moBpm','chantEveryMin','likeMilestone','title','subtitle','seatMode','joinOnEnter'];
 function fillSettings(s){ for (const k of SETTING_IDS){ const el=$(k); if (!el || s[k]===undefined) continue; if (el.type==='checkbox') el.checked=!!s[k]; else el.value=s[k]; } }
 function readSettings(){ const o={}; for (const k of SETTING_IDS){ const el=$(k); o[k] = el.type==='checkbox' ? el.checked : el.type==='number' ? +el.value : el.value; } return o; }
 const people = new Map();
@@ -199,6 +201,7 @@ $('btnSay').onclick = () => send('say', { text: $('sayText').value });
 $('btnChant').onclick = () => send('chant');
 $('btnBell').onclick = () => send('bell');
 $('btnMo').onclick = () => send('mo');
+$('btnTestLike').onclick = () => send('like', { n: 50 });
 for (const k of SETTING_IDS) $(k).addEventListener('change', () => send('settings', { settings: readSettings() }));
 </script>
 </body>

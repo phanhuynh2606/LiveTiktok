@@ -40,9 +40,13 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:var(-
 #merit{text-align:center}
 #merit h3{margin:0 0 8px;font-family:var(--display);font-size:28px;color:var(--gold2);letter-spacing:.06em}
 #merit ol{margin:0;padding:0;list-style:none;text-align:left;display:grid;gap:6px}
-#merit li{display:flex;justify-content:space-between;gap:10px}
-#merit li span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#merit li span:last-child{color:var(--gold2);font-variant-numeric:tabular-nums}
+#merit li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:19px}
+#merit .m-left{display:flex;align-items:center;gap:6px;min-width:0;flex:1}
+#merit .m-rank{color:var(--gold);font-weight:700;font-size:17px;min-width:18px}
+#merit .m-av{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold2);flex-shrink:0}
+#merit .m-av-badge{width:26px;height:26px;border-radius:50%;background:#4a1708;color:var(--gold2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1.5px solid var(--gold2);flex-shrink:0}
+#merit .m-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
+#merit .m-coins{color:var(--gold2);font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0;font-size:19px}
 #merit .empty{color:var(--muted);text-align:center}
 #prayers{font-size:18px}
 #prayers h3{margin:0 0 8px;font-family:var(--display);font-size:24px;color:var(--gold2);letter-spacing:.06em;text-align:center}
@@ -130,7 +134,7 @@ function avatar(url){ if(!url) return null; let im=avatars.get(url); if(!im){ im
 
 /* ======================= seats ======================= */
 // Floor trapezoid: row 0 is closest to altar, bottom row raised to 1770 to clear quotes
-const FLOOR = { yTop: 1215, yBot: 1770, halfTop: 290, halfBot: 430 };
+const FLOOR = { yTop: 1200, yBot: 1760, halfTop: 320, halfBot: 460 };
 const GRID = { 24:[6,4], 36:[6,6], 64:[8,8], 100:[10,10] };
 let cap = 24, seats = [];
 function layout(c){
@@ -139,7 +143,7 @@ function layout(c){
     const t = rows===1 ? .5 : r/(rows-1);                     // 0 = front row near altar
     const y = FLOOR.yTop + (FLOOR.yBot-FLOOR.yTop)*t;
     const half = FLOOR.halfTop + (FLOOR.halfBot-FLOOR.halfTop)*t;
-    const scale = (.26 + .24*t) * (6/cols) ** .75;
+    const scale = (.28 + .25*t) * (6/cols) ** .72;
     const gap = 2*half/(cols-1) * .93;                        // room for one name tag
     for (let k=0;k<cols;k++){
       let u = (k-(cols-1)/2)/((cols-1)/2); u = Math.sign(u)*(.14 + .86*Math.abs(u));   // open a centre aisle
@@ -179,7 +183,25 @@ function renderMerit(){
   const top = [...visitors.values()].filter(v=>v.coins>0).sort((a,b)=>b.coins-a.coins).slice(0,5);
   const ol = document.getElementById('meritList'); ol.innerHTML='';
   if (!top.length){ ol.innerHTML='<li class="empty">Chưa có</li>'; return; }
-  top.forEach((v,i)=>{ const li=document.createElement('li'); const a=document.createElement('span'); a.textContent=`${i+1}. ${v.name}`; const b=document.createElement('span'); b.textContent=v.coins; li.append(a,b); ol.append(li); });
+  top.forEach((v,i)=>{
+    const li = document.createElement('li');
+    const left = document.createElement('div'); left.className = 'm-left';
+    const rank = document.createElement('span'); rank.className = 'm-rank'; rank.textContent = `${i+1}.`;
+    const initial = (v.name || '?').trim().charAt(0).toUpperCase() || '?';
+    const badge = document.createElement('span'); badge.className = 'm-av-badge'; badge.textContent = initial;
+    const nameSpan = document.createElement('span'); nameSpan.className = 'm-name'; nameSpan.textContent = v.name;
+    left.append(rank);
+    if (v.avatar) {
+      const img = document.createElement('img'); img.className = 'm-av'; img.src = v.avatar; img.alt = v.name;
+      img.onerror = () => { img.remove(); left.insertBefore(badge, nameSpan); };
+      left.append(img);
+    } else {
+      left.append(badge);
+    }
+    left.append(nameSpan);
+    const b = document.createElement('span'); b.className = 'm-coins'; b.textContent = (+v.coins || 0).toLocaleString('vi-VN');
+    li.append(left, b); ol.append(li);
+  });
 }
 let giftHide=null;
 function showGift(m){
@@ -228,8 +250,24 @@ setInterval(()=>{ const qEl=document.getElementById('quote'); if(qEl) qEl.textCo
 
 /* ======================= audio ======================= */
 let AC=null, master=null, musicGain=null, sfx=null, settings={ music:true, mo:true, moBpm:52 };
-const TRACKS=['/assets/music/music1.mp3','/assets/music/music2.mp3']; let trackIdx=Math.floor(Math.random()*TRACKS.length), musicEl=null;
-document.getElementById('unmute').onclick = e => { e.currentTarget.remove(); startAudio(); };
+const TRACKS=['/assets/music/music1.mp3','/assets/music/music2.mp3']; let trackIdx=Math.floor(Math.random()*TRACKS.length), musicEl=null, musicSrc=null;
+const unmuteBtn = document.getElementById('unmute');
+function unlockAudio(){
+  if (!AC) startAudio();
+  else if (AC.state === 'suspended') AC.resume();
+  if (unmuteBtn && unmuteBtn.parentNode) unmuteBtn.remove();
+}
+if (unmuteBtn) unmuteBtn.onclick = unlockAudio;
+window.addEventListener('click', unlockAudio);
+
+// Tự động kích hoạt âm thanh & ẩn nút đỏ khi chạy trong TikTok LIVE Studio / OBS
+try {
+  startAudio();
+  if (unmuteBtn && unmuteBtn.parentNode) unmuteBtn.remove();
+} catch {}
+if (location.search.includes('nobtn') || location.search.includes('live')) {
+  if (unmuteBtn && unmuteBtn.parentNode) unmuteBtn.remove();
+}
 function startAudio(){
   AC = new (window.AudioContext||window.webkitAudioContext)();
   master = AC.createGain(); master.gain.value=.9; master.connect(AC.destination);
@@ -238,9 +276,9 @@ function startAudio(){
   nextTrack(); scheduleMo(); bell();
 }
 function nextTrack(){
-  if (musicEl){ musicEl.pause(); }
-  musicEl = new Audio(TRACKS[trackIdx++ % TRACKS.length]); const src=AC.createMediaElementSource(musicEl); src.connect(musicGain);
-  musicEl.onended = nextTrack; musicEl.play().catch(()=>{});
+  // reuse persistent audio element
+  if (!musicEl){ musicEl=new Audio(); musicSrc=AC.createMediaElementSource(musicEl); musicSrc.connect(musicGain); musicEl.onended=nextTrack; } musicEl.src=TRACKS[trackIdx++ % TRACKS.length];
+  musicEl.play().catch(()=>{});
 }
 function duck(on){ if(!musicGain) return; const t=AC.currentTime, target = !settings.music ? 0 : on ? .14 : .5; musicGain.gain.cancelScheduledValues(t); musicGain.gain.setValueAtTime(musicGain.gain.value,t); musicGain.gain.linearRampToValueAtTime(target,t+.5); }
 let haloPulse=0;
@@ -258,12 +296,14 @@ function mo(){
 let moTimer=null; function scheduleMo(){ clearInterval(moTimer); if (AC && settings.mo) moTimer=setInterval(mo, 60000/Math.max(20,settings.moBpm||52)); }
 // server-made voice lines play one after another
 const ttsQ=[]; let ttsPlaying=false;
-function queueTTS(url, onStart){ ttsQ.push({url,onStart}); playTTS(); }
+function queueTTS(url, onStart){ while(ttsQ.length>2) ttsQ.shift(); ttsQ.push({url,onStart}); playTTS(); }
 function playTTS(){
-  if (ttsPlaying || !ttsQ.length || !AC) return; ttsPlaying=true;
+  if (ttsPlaying || !ttsQ.length || !AC) return;
+  if (AC.state === 'suspended') AC.resume().catch(()=>{});
+  ttsPlaying=true;
   const {url,onStart}=ttsQ.shift(); const el=new Audio(url); const src=AC.createMediaElementSource(el); const g=AC.createGain(); g.gain.value=1.25; src.connect(g); g.connect(master);
   el.onplay=()=>{ duck(true); onStart&&onStart(); }; el.onended=el.onerror=()=>{ duck(false); ttsPlaying=false; setTimeout(playTTS,350); };
-  el.play().catch(()=>{ ttsPlaying=false; });
+  el.play().catch(()=>{ duck(false); ttsPlaying=false; });
 }
 
 /* ======================= effects ======================= */
@@ -339,6 +379,7 @@ function connect(){
       case 'gift': {
         const v=visitors.get(m.id);
         if(v){
+          if(m.avatar && !v.avatar) v.avatar = m.avatar;
           v.focus = 8;
           v.coins=m.total; giftFx(v,m.tier);
           v.bubble={text:'🙏 '+(m.prayer||m.giftName), until:performance.now()+35000, gold:true};
@@ -351,7 +392,12 @@ function connect(){
       case 'like': { const v=visitors.get(m.id); if(v) hearts(v,m.n); } break;
       case 'tts': queueTTS(m.url); break;
       case 'chant': showChant(m.text); bell(); break;
-      case 'bell': bell(true); break;
+      case 'bell': {
+        bell(true);
+        if (m.milestone) {
+          for (let i = 0; i < 20; i++) petals.push({ x: 540 + (Math.random() - .5) * 600, y: 300 + Math.random() * 250, vx: (Math.random() - .5) * 40, vy: 30 + Math.random() * 50, t: 0, life: 4, s: .18 + Math.random() * .12 });
+        }
+      } break;
       case 'mo1': mo(); break;
     }
   };
@@ -368,14 +414,14 @@ const ctx=document.getElementById('c').getContext('2d');
 function sprite(im,x,y,s,ay=1){ if(!im?.naturalWidth) return; const w=im.naturalWidth*s,h=im.naturalHeight*s; ctx.drawImage(im,x-w/2,y-h*ay,w,h); }
 function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function tag(text,x,y,s,style,av,maxW){
-  const fs=Math.max(12,Math.round(23*s/.4)); ctx.font=`600 ${fs}px "Be Vietnam Pro",system-ui,sans-serif`;
-  const pad=fs*.35; let aw = av?fs*1.1:0;
-  if (maxW){ if (aw && maxW < fs*4) aw=0, av=null; let t=text; while (t.length>2 && ctx.measureText(t).width+pad*2+aw > maxW) t=t.slice(0,-1); if (t!==text) text=t.trimEnd()+'…'; }
-  const w=ctx.measureText(text).width+pad*2+aw, h=fs*1.42;
-  ctx.fillStyle = style==='gold'?'rgba(70,30,8,.92)':'rgba(18,9,5,.72)'; rr(x-w/2,y-h/2,w,h,h/2); ctx.fill();
-  ctx.lineWidth = style==='gold'?2.5:1.2; ctx.strokeStyle = style==='gold'?'#e2b04f':'rgba(226,176,79,.55)'; ctx.stroke();
-  if (av){ ctx.save(); ctx.beginPath(); ctx.arc(x-w/2+pad*.5+aw/2, y, fs*.48, 0, 6.29); ctx.clip(); ctx.drawImage(av, x-w/2+pad*.5+aw/2-fs*.48, y-fs*.48, fs*.96, fs*.96); ctx.restore(); }
-  ctx.fillStyle = style==='gold'?'#ffd98a':'#f6e9cf'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(text, x+aw/2, y+1);
+  const fs=Math.max(12,Math.min(20,Math.round(15*s/.35))); ctx.font=`600 ${fs}px "Be Vietnam Pro",system-ui,sans-serif`;
+  const pad=fs*.32; const avR=fs*.48, avSz=avR*2; let aw=avSz+pad*.25;
+  const effMax=maxW?maxW*1.05:0; let t=text; if(effMax){ while(t.length>2 && ctx.measureText(t).width+pad*2+aw>effMax) t=t.slice(0,-1); if(t!==text) t=t.trimEnd()+'…'; text=t; }
+  const w=ctx.measureText(t).width+pad*2+aw, h=fs*1.38;
+  ctx.fillStyle=style==='gold'?'rgba(70,28,8,.92)':'rgba(16,7,4,.85)'; rr(x-w/2,y-h/2,w,h,h/2); ctx.fill();
+  ctx.lineWidth=style==='gold'?2:1.2; ctx.strokeStyle=style==='gold'?'#ffe082':'rgba(226,176,79,.65)'; ctx.stroke();
+  const avX=x-w/2+pad*.45+avR; if (av){ ctx.save(); ctx.beginPath(); ctx.arc(avX,y,avR,0,6.29); ctx.clip(); ctx.drawImage(av,avX-avR,y-avR,avSz,avSz); ctx.restore(); } else { ctx.beginPath(); ctx.arc(avX,y,avR,0,6.29); ctx.fillStyle=style==='gold'?'#8a3512':'#3d160c'; ctx.fill(); ctx.fillStyle='#ffd98a'; ctx.font=`700 ${Math.round(fs*.68)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(text.charAt(0).toUpperCase()||'🙏',avX,y+1); } ctx.beginPath(); ctx.arc(avX,y,avR,0,6.29); ctx.lineWidth=1.5; ctx.strokeStyle=style==='gold'?'#ffe082':'#e2b04f'; ctx.stroke();
+  ctx.save(); ctx.fillStyle=style==='gold'?'#fff0ba':'#ffffff'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.shadowColor='rgba(0,0,0,.75)'; ctx.shadowBlur=3; ctx.font=`600 ${fs}px "Be Vietnam Pro",system-ui,sans-serif`; ctx.fillText(t,avX+avR+pad*.28,y+1); ctx.restore();
 }
 function bubble(text,x,y,s,gold){
   const fs=Math.max(18,Math.round(26*s/.4)); ctx.font=`500 ${fs}px "Be Vietnam Pro",system-ui,sans-serif`;

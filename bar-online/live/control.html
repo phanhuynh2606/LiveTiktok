@@ -3,180 +3,803 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bảng điều khiển · Vũ Trường Cõi Mạng</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap">
+<title>VJ Studio Console · Vũ Trường Cõi Mạng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@600;700;800;900&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Layout: three columns of cards (connection · interaction · sound/scene) over a status bar */
 :root {
-  --bg: #0c0714; --card: #150d24; --card2: #201438; --fg: #f5edff; --muted: #a694bf; --line: #37235a;
-  --pink: #ff007f; --blue: #00f0ff; --gold: #ffcc00; --green: #2ecc71; --red: #e74c3c;
-  --display: "Montserrat", sans-serif; --body: "Be Vietnam Pro", system-ui, sans-serif;
-  color-scheme: dark;
+  --bg-deep: #05020a;
+  --bg-card: rgba(16, 8, 28, 0.75);
+  --bg-card-hover: rgba(26, 14, 46, 0.85);
+  --bg-elevated: #160a29;
+  --line-subtle: rgba(140, 90, 220, 0.16);
+  --line-bright: rgba(255, 0, 127, 0.45);
+  --line-cyan: rgba(0, 242, 255, 0.45);
+  --line-gold: rgba(255, 200, 55, 0.5);
+
+  --neon-pink: #ff007f;
+  --neon-cyan: #00f2ff;
+  --neon-gold: #ffc837;
+  --neon-green: #00ff88;
+  --neon-red: #ff3344;
+  --neon-purple: #b042ff;
+
+  --text-main: #fcfaff;
+  --text-dim: #9d8db5;
+  --text-muted: #64557d;
+
+  --font-display: "Montserrat", sans-serif;
+  --font-ui: "Outfit", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --pad-radius: 14px;
+  --btn-radius: 10px;
 }
-* { box-sizing: border-box; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 var(--body);
-  padding: 18px max(16px, env(safe-area-inset-right)) 30px max(16px, env(safe-area-inset-left));
+  background: var(--bg-deep);
+  background-image: 
+    radial-gradient(circle at 15% 10%, rgba(176, 66, 255, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 85% 15%, rgba(0, 242, 255, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(255, 0, 127, 0.09) 0%, transparent 50%),
+    linear-gradient(180deg, #07030e 0%, #040108 100%);
+  color: var(--text-main);
+  font: 14px/1.5 var(--font-ui);
+  min-height: 100vh;
+  padding: 20px 24px 40px;
+  overflow-x: hidden;
 }
-header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
-h1 { font-family: var(--display); font-size: 24px; font-weight: 800; margin: 0; color: var(--gold); letter-spacing: 1px; }
-.status { display: flex; gap: 10px; flex-wrap: wrap; }
-.chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-variant-numeric: tabular-nums; }
-.chip.ok { border-color: var(--green); color: #9fe0b4; }
-.chip.bad { border-color: var(--red); color: #f3a3a3; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; align-items: start; }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
-.card h2 { margin: 0; font: 700 15px var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
-.hint { color: var(--muted); font-size: 12px; }
-label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
-input, select, textarea { font: inherit; color: var(--fg); background: #08040d; border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; width: 100%; min-width: 0; }
-textarea { resize: vertical; min-height: 60px; }
-.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
-.row > * { flex: 1 1 0; min-width: 0; }
-.row.tight > * { flex: 0 0 auto; }
-button { font: 600 13px var(--body); color: var(--fg); background: var(--card2); border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; cursor: pointer; transition: 0.15s ease; }
-button:hover { border-color: var(--pink); color: #fff; }
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--pink); outline-offset: 1px; }
-button.primary { background: var(--pink); border-color: #ff3399; color: #fff; }
-button.gold { background: #5c440a; border-color: var(--gold); color: #fff; }
-button.red { background: #611818; border-color: var(--red); }
-.check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--fg); }
-.check input { width: auto; }
-#people { max-height: 320px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; }
-#people table { width: 100%; border-collapse: collapse; font-size: 13px; }
-#people td { padding: 6px 8px; border-bottom: 1px solid #23163b; }
-#people td:last-child { text-align: right; color: var(--gold); font-variant-numeric: tabular-nums; }
-#log { height: 220px; overflow: auto; background: #060309; border: 1px solid var(--line); border-radius: 10px; padding: 8px; font: 12px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Master Top Bar */
+.master-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-badge {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(255, 0, 127, 0.45);
+}
+.brand-badge svg { width: 24px; height: 24px; fill: #fff; }
+
+.brand-text h1 {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #fff 0%, var(--neon-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-text p {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+}
+
+.telemetry-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tele-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 9, 34, 0.85);
+  border: 1px solid var(--line-subtle);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+.tele-pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+.tele-pill.ok { border-color: rgba(0, 255, 136, 0.4); color: #9dfad0; }
+.tele-pill.ok .dot { background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green); }
+.tele-pill.bad { border-color: rgba(255, 51, 68, 0.4); color: #ff9da6; }
+.tele-pill.bad .dot { background: var(--neon-red); box-shadow: 0 0 8px var(--neon-red); }
+
+.btn-launch-overlay {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(255, 200, 55, 0.15), rgba(255, 0, 127, 0.25));
+  border: 1px solid var(--neon-gold);
+  border-radius: 999px;
+  padding: 8px 18px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 16px rgba(255, 200, 55, 0.25);
+}
+.btn-launch-overlay:hover {
+  background: linear-gradient(135deg, var(--neon-gold), var(--neon-pink));
+  color: #000;
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(255, 0, 127, 0.5);
+}
+
+/* Master Bento Grid Architecture */
+.bento-container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-flow: dense;
+  gap: 18px;
+}
+
+.bento-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--pad-radius);
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color 0.25s ease;
+}
+.bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+.bento-card:hover {
+  border-color: rgba(176, 66, 255, 0.35);
+}
+
+.col-4 { grid-column: span 4; }
+.col-5 { grid-column: span 5; }
+.col-6 { grid-column: span 6; }
+.col-7 { grid-column: span 7; }
+.col-8 { grid-column: span 8; }
+.col-12 { grid-column: span 12; }
+
+@media (max-width: 1180px) {
+  .col-4, .col-5, .col-6, .col-7, .col-8 { grid-column: span 6; }
+}
+@media (max-width: 768px) {
+  .col-4, .col-5, .col-6, .col-7, .col-8, .col-12 { grid-column: span 12; }
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.card-title-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.card-title-left svg {
+  width: 17px;
+  height: 17px;
+  fill: var(--neon-pink);
+}
+.card-title h2 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff;
+}
+.card-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(255, 0, 127, 0.15);
+  color: var(--neon-pink);
+  border: 1px solid rgba(255, 0, 127, 0.3);
+  letter-spacing: 0.5px;
+}
+
+/* Form Controls & Inputs */
+label.input-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
+}
+
+input, select, textarea {
+  background: rgba(6, 3, 11, 0.85);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--btn-radius);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  width: 100%;
+  outline: none;
+  transition: all 0.2s ease;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0, 242, 255, 0.25);
+  background: rgba(10, 4, 18, 0.95);
+}
+textarea {
+  min-height: 64px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.input-row > * { flex: 1; }
+.input-row.tight > * { flex: 0 0 auto; }
+
+/* Interactive Pads & Action Buttons */
+.pad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.pad-btn {
+  background: rgba(22, 10, 41, 0.7);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--btn-radius);
+  color: #fff;
+  padding: 10px 12px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+.pad-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--neon-pink);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(255, 0, 127, 0.22);
+}
+.pad-btn:active {
+  transform: scale(0.97);
+}
+
+.pad-btn.primary {
+  background: linear-gradient(135deg, rgba(255, 0, 127, 0.3), rgba(176, 66, 255, 0.3));
+  border-color: var(--neon-pink);
+  color: #fff;
+}
+.pad-btn.primary:hover {
+  background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+  box-shadow: 0 0 20px rgba(255, 0, 127, 0.5);
+}
+
+.pad-btn.gold {
+  background: rgba(45, 30, 8, 0.85);
+  border-color: var(--neon-gold);
+  color: #ffe899;
+}
+.pad-btn.gold:hover {
+  background: var(--neon-gold);
+  color: #1a1000;
+  box-shadow: 0 0 20px rgba(255, 200, 55, 0.5);
+}
+
+.pad-btn.cyan {
+  background: rgba(4, 30, 40, 0.8);
+  border-color: var(--neon-cyan);
+  color: #99f7ff;
+}
+.pad-btn.cyan:hover {
+  background: var(--neon-cyan);
+  color: #002229;
+  box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+}
+
+.pad-btn.danger {
+  background: rgba(40, 8, 12, 0.8);
+  border-color: var(--neon-red);
+  color: #ff99a2;
+}
+.pad-btn.danger:hover {
+  background: var(--neon-red);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255, 51, 68, 0.5);
+}
+
+/* Gift Cards Grid */
+.gift-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+.gift-card-btn {
+  background: rgba(18, 9, 32, 0.7);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--btn-radius);
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  transition: all 0.18s ease;
+  color: #fff;
+}
+.gift-card-btn .g-name {
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.gift-card-btn .g-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--neon-cyan);
+}
+.gift-card-btn:hover {
+  border-color: var(--neon-gold);
+  background: rgba(36, 18, 64, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 200, 55, 0.25);
+}
+
+/* Guest Table Deck */
+.guest-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.table-scroll {
+  max-height: 310px;
+  overflow-y: auto;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--btn-radius);
+  background: rgba(5, 2, 9, 0.75);
+}
+.table-scroll::-webkit-scrollbar { width: 6px; }
+.table-scroll::-webkit-scrollbar-thumb { background: rgba(140, 90, 220, 0.3); border-radius: 999px; }
+
+table.guest-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+table.guest-table tr {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+table.guest-table tr:hover {
+  background: rgba(255, 0, 127, 0.15);
+}
+table.guest-table td {
+  padding: 8px 12px;
+}
+table.guest-table td:last-child {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--neon-gold);
+}
+
+/* Checkbox Switches */
+.toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+.toggle-chip input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--neon-pink);
+  cursor: pointer;
+}
+
+/* Terminal Log View */
+.log-terminal {
+  height: 200px;
+  overflow-y: auto;
+  background: #030106;
+  border: 1px solid rgba(140, 90, 220, 0.25);
+  border-radius: var(--btn-radius);
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: #b5a4d4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+}
+.log-terminal::-webkit-scrollbar { width: 6px; }
+.log-terminal::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.25); border-radius: 999px; }
+
+.section-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.glow-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-subtle), transparent);
+  margin: 4px 0;
+}
 </style>
 </head>
 <body>
-<header>
-  <h1>🍸 Bảng điều khiển · Vũ Trường Cõi Mạng</h1>
-  <div class="status">
-    <span class="chip" id="srv">Server: …</span>
-    <span class="chip" id="tt">TikTok: chưa kết nối</span>
-    <span class="chip" id="cnt">0 khách</span>
+
+<!-- Header Master Deck -->
+<header class="master-header">
+  <div class="brand">
+    <div class="brand-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+    </div>
+    <div class="brand-text">
+      <h1>Vũ Trường Cõi Mạng</h1>
+      <p>VJ Master Control Deck · TikTok Live</p>
+    </div>
+  </div>
+
+  <div class="telemetry-bar">
+    <div class="tele-pill" id="srvPill">
+      <span class="dot"></span>
+      <span id="srv">Server: …</span>
+    </div>
+    <div class="tele-pill" id="ttPill">
+      <span class="dot"></span>
+      <span id="tt">TikTok: chưa kết nối</span>
+    </div>
+    <div class="tele-pill ok">
+      <span class="dot"></span>
+      <span id="cnt">0 khách</span>
+    </div>
+    <button class="btn-launch-overlay" id="btnOverlay">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM5 15h14v3H5z"/></svg>
+      Mở Overlay 9:16
+    </button>
   </div>
 </header>
 
-<div class="grid">
-  <!-- Cột 1: Kết nối & Danh sách khách -->
-  <section class="card">
-    <h2>1 · Kết nối TikTok LIVE</h2>
-    <label for="uid">Username kênh đang live</label>
-    <div class="row">
-      <input id="uid" placeholder="@tenkenhcuaban" autocomplete="off">
-      <button class="primary" id="btnConnect">Kết nối</button>
-      <button id="btnDisconnect">Ngắt</button>
+<!-- Bento Grid Layout -->
+<main class="bento-container">
+
+  <!-- Section 1: TikTok Live Gateway & Sức Chứa (Col 4) -->
+  <section class="bento-card col-4">
+    <div class="card-title">
+      <div class="card-title-left">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V18a1 1 0 0 1-2 0v-1.07A7 7 0 0 1 5.07 11H4a1 1 0 0 1 0-2h1.07A7 7 0 0 1 11 3.07V2a1 1 0 0 1 2 0v1.07A7 7 0 0 1 18.93 9H20a1 1 0 0 1 0 2h-1.07A7 7 0 0 1 13 16.93z"/></svg>
+        <h2>Kết Nối TikTok LIVE</h2>
+      </div>
+      <span class="card-badge">GATEWAY</span>
     </div>
-    <p class="hint">Đọc sự kiện thời gian thực từ TikTok Live (cmt, quà, tim). Không cần mật khẩu hay cookie. Bật LIVE trước rồi mới kết nối.</p>
-    <button class="gold" id="btnOverlay">🖥️ Mở màn hình overlay 9:16</button>
-    <p class="hint">Trong TikTok Studio / OBS: Add source → Window capture (hoặc Browser source). Bấm "Bật âm thanh" 1 lần trong cửa sổ overlay.</p>
-    <h2>Khách trong vũ trường (Click để Spotlight)</h2>
-    <div id="people">
-      <table><tbody id="peopleBody"><tr><td class="hint">Chưa có ai</td><td></td></tr></tbody></table>
+
+    <label class="input-label" for="uid">
+      TikTok Channel Username
+      <div class="input-row">
+        <input id="uid" placeholder="@username_kenh_live" autocomplete="off">
+      </div>
+    </label>
+
+    <div class="input-row">
+      <button class="pad-btn primary" id="btnConnect">Kết Nối Live</button>
+      <button class="pad-btn" id="btnDisconnect">Ngắt</button>
+    </div>
+    <p class="section-hint">Đọc sự kiện thời gian thực từ TikTok Live (cmt, quà, tim). Không cần mật khẩu hay cookie. Bật LIVE trước rồi mới kết nối.</p>
+
+    <div class="glow-line"></div>
+
+    <div class="card-title">
+      <div class="card-title-left">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+        <h2>Sức Chứa & Sàn Nhảy</h2>
+      </div>
+    </div>
+
+    <label class="input-label" for="seatMode">
+      Chế độ quy mô khán giả
+      <select id="seatMode">
+        <option value="auto">Tự mở rộng (24 → 36)</option>
+        <option value="24">Cố định 24 khách</option>
+        <option value="36">Cố định 36 khách</option>
+      </select>
+    </label>
+    <p class="section-hint">Tự mở rộng: dưới 24 khách xếp 24 chỗ, đông hơn tự mở rộng lên 36 chỗ. Vượt 36 người thì ai im lặng lâu nhất sẽ nhường chỗ cho khách mới.</p>
+
+    <label class="toggle-chip">
+      <input type="checkbox" id="joinOnEnter">
+      <span>Tự đưa người xem lên sàn ngay khi vừa vào live</span>
+    </label>
+  </section>
+
+  <!-- Section 2: VJ Action Pad & Outfits (Col 4) -->
+  <section class="bento-card col-4">
+    <div class="card-title">
+      <div class="card-title-left">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        <h2>VJ Performance Pad</h2>
+      </div>
+      <span class="card-badge">ACTIONS</span>
+    </div>
+
+    <label class="input-label">Hành động tương tác nhanh</label>
+    <div class="pad-grid">
+      <button class="pad-btn" data-chat="cụng ly">🥂 Cụng ly</button>
+      <button class="pad-btn" data-chat="lên đồ">🕺 Lên đồ</button>
+      <button class="pad-btn primary" data-chat="quẩy">💃 Quẩy nhiệt</button>
+      <button class="pad-btn" data-chat="bật quẹt">🔥 Bật quẹt</button>
+      <button class="pad-btn gold" data-chat="khui rượu">🍾 Khui rượu</button>
+    </div>
+
+    <div class="glow-line"></div>
+
+    <label class="input-label">Đổi trang phục vũ trường</label>
+    <div class="pad-grid">
+      <button class="pad-btn" data-chat="vest">🤵 Nam Vest</button>
+      <button class="pad-btn" data-chat="đầm">💃 Đầm Đỏ</button>
+      <button class="pad-btn" data-chat="dân chơi">🧢 Dân Chơi</button>
+      <button class="pad-btn" data-chat="sexy">🖤 Sexy Girl</button>
+    </div>
+
+    <div class="glow-line"></div>
+
+    <label class="input-label">Mô phỏng Chat & Tương tác</label>
+    <div class="input-row">
+      <input id="simName" value="DânChơi_SàiGòn" placeholder="Tên khách" style="max-width: 140px;">
+      <input id="simText" value="Quẩy banh nóc luôn anh em ơi!" placeholder="Lời nhắn chat">
+    </div>
+    <button class="pad-btn cyan" id="btnChat">Bắn Bình Luận Lên Sàn</button>
+  </section>
+
+  <!-- Section 3: VIP Gift & Rewards Rack (Col 4) -->
+  <section class="bento-card col-4">
+    <div class="card-title">
+      <div class="card-title-left">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <h2>VIP Gift & Mở Bàn</h2>
+      </div>
+      <span class="card-badge">REWARDS</span>
+    </div>
+
+    <label class="input-label">Kích hoạt Quà Tặng Vũ Trường</label>
+    <div class="gift-grid">
+      <button class="gift-card-btn" data-gift="Hoa hồng" data-dia="1">
+        <span class="g-name">🌹 Hoa hồng</span>
+        <span class="g-val">1 Diamond</span>
+      </button>
+      <button class="gift-card-btn" data-gift="Bắn tim" data-dia="1">
+        <span class="g-name">🫰 Bắn tim</span>
+        <span class="g-val">1 Diamond</span>
+      </button>
+      <button class="gift-card-btn" data-gift="Tháp bia" data-dia="5">
+        <span class="g-name">🍺 Tháp Bia</span>
+        <span class="g-val">5 Diamonds</span>
+      </button>
+      <button class="gift-card-btn" data-gift="Kính râm" data-dia="10">
+        <span class="g-name">🕶️ Kính VIP</span>
+        <span class="g-val">10 Diamonds</span>
+      </button>
+      <button class="gift-card-btn" data-gift="Sâm panh" data-dia="30">
+        <span class="g-name">🍾 Bàn VIP</span>
+        <span class="g-val">30 Diamonds</span>
+      </button>
+      <button class="gift-card-btn" data-gift="Siêu xe" data-dia="199">
+        <span class="g-name">🏎️ Siêu Xe</span>
+        <span class="g-val">199 Diamonds</span>
+      </button>
+      <button class="gift-card-btn" data-gift="Sư tử" data-dia="299" style="grid-column: span 2; border-color: var(--neon-gold);">
+        <span class="g-name" style="color:var(--neon-gold)">👑 Bao Trọn Vũ Trường</span>
+        <span class="g-val">299 Diamonds · Bắn Pháo Hoa & Còi Hơi</span>
+      </button>
+    </div>
+
+    <div class="glow-line"></div>
+
+    <label class="input-label">Đổ nhanh khách mẫu (Simulation)</label>
+    <div class="input-row">
+      <button class="pad-btn" data-fill="15">15 Khách</button>
+      <button class="pad-btn" data-fill="24">24 Khách</button>
+      <button class="pad-btn primary" data-fill="36">36 Khách</button>
+      <button class="pad-btn danger" id="btnClear">Dọn Sàn</button>
     </div>
   </section>
 
-  <!-- Cột 2: Thử tương tác -->
-  <section class="card">
-    <h2>2 · Thử tương tác</h2>
-    <label for="simName">Tên người xem</label>
-    <input id="simName" value="DânChơi_SàiGòn">
-    <label for="simText">Bình luận / lời nhắn</label>
-    <input id="simText" value="Quẩy banh nóc luôn anh em ơi!">
-    <div class="row"><button class="primary" id="btnChat">Gửi bình luận</button></div>
-
-    <label>Hành động tương tác</label>
-    <div class="row">
-      <button data-chat="cụng ly">🥂 Cụng ly</button>
-      <button data-chat="lên đồ">🕺 Lên đồ</button>
-      <button data-chat="quẩy">💃 Quẩy nhiệt</button>
-      <button data-chat="bật quẹt">🔥 Bật quẹt</button>
-      <button data-chat="khui rượu">🍾 Khui rượu</button>
+  <!-- Section 4: Live Audience Spotlight Roster (Col 5) -->
+  <section class="bento-card col-5">
+    <div class="card-title">
+      <div class="card-title-left">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        <h2>Danh Sách Khách (Click Để Spotlight)</h2>
+      </div>
+      <span class="card-badge">LIVE ROSTER</span>
     </div>
 
-    <label>Đổi trang phục</label>
-    <div class="row">
-      <button data-chat="vest">🤵 Nam vest</button>
-      <button data-chat="đầm">💃 Nữ đầm</button>
-      <button data-chat="dân chơi">😎 Dân chơi</button>
-      <button data-chat="dj">🎧 DJ</button>
-      <button data-chat="chủ tịch">👑 Chủ tịch</button>
+    <div class="guest-deck">
+      <div class="table-scroll" id="people">
+        <table class="guest-table">
+          <tbody id="peopleBody">
+            <tr><td class="section-hint" style="text-align:center;padding:24px;">Đang tải danh sách khách lên sàn…</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="section-hint">💡 Nhấp chuột trực tiếp vào tên khách bất kỳ để camera tự động zoom in và rọi đèn Spotlight trung tâm cho khách biểu diễn.</p>
     </div>
 
-    <label>Tặng quà & Mở bàn</label>
-    <div class="row">
-      <button data-gift="Hoa hồng" data-dia="1">🌹 Hoa hồng · 1</button>
-      <button data-gift="Bắn tim" data-dia="1">🫰 Bắn tim · 1</button>
-      <button data-gift="Tháp bia" data-dia="5">🍺 Bia · 5</button>
-      <button data-gift="Kính râm" data-dia="10">🕶️ Kính VIP · 10</button>
-      <button data-gift="Sâm panh" data-dia="30">🍾 Mở Bàn VIP · 30</button>
-      <button data-gift="Siêu xe" data-dia="199">🏎️ Siêu xe · 199</button>
-      <button data-gift="Sư tử" data-dia="299">👑 Bao Trọn Quán · 299</button>
-    </div>
+    <div class="glow-line"></div>
 
-    <h2>Đổ khách mẫu vào sàn</h2>
-    <div class="row">
-      <button data-fill="15">15 khách</button>
-      <button data-fill="24">24 khách</button>
-      <button data-fill="36">36 khách</button>
-      <button data-fill="60">60 khách</button>
+    <div class="card-title">
+      <div class="card-title-left">
+        <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2v2h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4V4a2 2 0 0 1 2-2zm-2 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm4 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+        <h2>Bot Mô Phỏng Quẩy</h2>
+      </div>
     </div>
-    <button class="red" id="btnClear">Làm trống toàn bộ sàn nhảy</button>
-
-    <h2>Bot mô phỏng quẩy tự động</h2>
-    <div class="row">
-      <label>Số bot<input id="botN" type="number" min="1" max="60" value="12"></label>
-      <label>Nhịp<select id="botPace"><option value="slow">Chậm</option><option value="mid" selected>Vừa</option><option value="fast">Nhanh</option></select></label>
-      <button id="btnBots">Bật bot</button>
+    <div class="input-row">
+      <label class="input-label" style="max-width: 100px;">
+        Số Bot
+        <input id="botN" type="number" min="1" max="36" value="18">
+      </label>
+      <label class="input-label" style="max-width: 120px;">
+        Nhịp Quẩy
+        <select id="botPace">
+          <option value="slow">Chậm</option>
+          <option value="mid" selected>Vừa</option>
+          <option value="fast">Nhanh</option>
+        </select>
+      </label>
+      <button class="pad-btn cyan" id="btnBots" style="height: 38px; align-self: flex-end;">Bật Bot</button>
     </div>
-    <p class="hint">Bot quẩy ngẫu nhiên để test giao diện và giọng MC.</p>
   </section>
 
-  <!-- Cột 3: Cài đặt MC, Nhạc, Đèn -->
-  <section class="card">
-    <h2>3 · MC Hype · Nhạc · Hiệu ứng</h2>
-    <div class="row">
-      <label>Giọng MC<select id="voice"><option value="vi-VN-NamMinhNeural">Nam Minh (nam sung mãn)</option><option value="vi-VN-HoaiMyNeural">Hoài My (nữ sôi động)</option></select></label>
-      <label>Độ trầm/cao (Hz)<input id="pitch" type="number" step="1" value="12"></label>
-      <label>Tốc độ (%)<input id="rate" type="number" step="1" value="22"></label>
+  <!-- Section 5: MC Synth Deck & Stage FX (Col 7) -->
+  <section class="bento-card col-7">
+    <div class="card-title">
+      <div class="card-title-left">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
+        <h2>MC Hype Synthesizer & SoundFX</h2>
+      </div>
+      <span class="card-badge">LIVE AUDIO</span>
     </div>
-    <label for="sayText">MC Hô thử / Thông báo</label>
-    <textarea id="sayText">Quẩy lên nào anh em ơi! Chúc toàn thể dân chơi đêm nay vạn sự như ý, sức khỏe dồi dào, tiền vào như nước!</textarea>
-    <div class="row">
-      <button class="primary" id="btnSay">MC hô vang lên live</button>
-    </div>
-    <div class="row tight">
-      <label class="check"><input type="checkbox" id="music" checked> Nhạc nền BGM</label>
-      <label class="check"><input type="checkbox" id="strobe" checked> Đèn nháy Strobe</label>
-      <label class="check"><input type="checkbox" id="airhorn" checked> Còi hơi Airhorn</label>
-    </div>
-    <div class="row">
-      <button id="btnStrobe">⚡ Kích hoạt Strobe Flash</button>
-      <button id="btnAirhorn">🚨 Hú còi Airhorn</button>
-    </div>
-    <h2>Cảnh vũ trường</h2>
-    <label>Tên quán bar<input id="title" value="VŨ TRƯỜNG CÕI MẠNG"></label>
-    <label>Dòng phụ khẩu hiệu<input id="subtitle" value="CHÁY HẾT MÌNH ĐÊM NAY · QUẨY LÊN ANH EM ƠI"></label>
-    <div class="row">
-      <label>Sức chứa sàn<select id="seatMode"><option value="auto">Tự mở rộng (24 → 60)</option><option value="24">24 khách</option><option value="36">36 khách</option><option value="60">60 khách</option></select></label>
-    </div>
-    <label class="check"><input type="checkbox" id="joinOnEnter"> Người chỉ vừa vào phòng live cũng được lên sàn (không cần comment)</label>
-  </section>
-</div>
 
-<section class="card" style="margin-top:16px">
-  <h2>Nhật ký hoạt động (Logs)</h2>
-  <div id="log" aria-live="polite"></div>
-</section>
-<footer class="hint" style="margin-top:14px;text-align:center">Vũ Trường Cõi Mạng · Bar Online Live Interactive</footer>
+    <div class="input-row">
+      <label class="input-label" style="flex: 2;">
+        Giọng Đọc MC
+        <select id="voice">
+          <option value="vi-VN-NamMinhNeural">Nam Minh (Giọng Nam Hype Sung Mãn)</option>
+          <option value="vi-VN-HoaiMyNeural">Hoài My (Giọng Nữ Sôi Động)</option>
+        </select>
+      </label>
+      <label class="input-label">
+        Tone (Hz)
+        <input id="pitch" type="number" step="1" value="12">
+      </label>
+      <label class="input-label">
+        Tốc Độ (%)
+        <input id="rate" type="number" step="1" value="22">
+      </label>
+    </div>
+
+    <label class="input-label" for="sayText">
+      MC Hô Thử / Lời Chúc / Thông Báo Sân Khấu
+      <textarea id="sayText">Quẩy lên nào anh em ơi! Chúc toàn thể dân chơi đêm nay vạn sự như ý, sức khỏe dồi dào, tiền vào như nước!</textarea>
+    </label>
+    <button class="pad-btn primary" id="btnSay" style="width: 100%;">🎙️ MC Hô Vang Lên Sân Khấu Live</button>
+
+    <div class="glow-line"></div>
+
+    <div class="toggle-row">
+      <label class="toggle-chip"><input type="checkbox" id="music" checked> <span>Nhạc nền BGM Club</span></label>
+      <label class="toggle-chip"><input type="checkbox" id="strobe" checked> <span>Đèn nháy Strobe</span></label>
+      <label class="toggle-chip"><input type="checkbox" id="airhorn" checked> <span>Còi hơi Airhorn</span></label>
+    </div>
+
+    <div class="input-row">
+      <button class="pad-btn" id="btnStrobe" style="border-color:var(--neon-cyan); color:var(--neon-cyan);">⚡ Kích Hoạt Strobe Flash</button>
+      <button class="pad-btn gold" id="btnAirhorn">🚨 Hú Còi Airhorn</button>
+      <button class="pad-btn" id="btnSmoke" style="border-color:#b042ff; color:#b042ff;">💨 Phụt Khói CO2</button>
+      <button class="pad-btn" id="btnToastAll" style="border-color:#ffcc00; color:#ffcc00;">🥂 Cạn Ly Toàn Sàn</button>
+    </div>
+
+    <div class="glow-line"></div>
+
+    <div class="input-row">
+      <label class="input-label">
+        Tên Vũ Trường
+        <input id="title" value="VŨ TRƯỜNG CÕI MẠNG">
+      </label>
+      <label class="input-label">
+        Khẩu Hiệu Sân Khấu
+        <input id="subtitle" value="CHÁY HẾT MÌNH ĐÊM NAY · QUẨY LÊN ANH EM ƠI">
+      </label>
+    </div>
+  </section>
+
+  <!-- Section 6: Telemetry Logs & Activity Stream (Col 12) -->
+  <section class="bento-card col-12">
+    <div class="card-title">
+      <div class="card-title-left">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z"/></svg>
+        <h2>Nhật Ký Hoạt Động & Sự Kiện Trực Tiếp</h2>
+      </div>
+      <span class="card-badge" style="color:var(--neon-green); border-color:rgba(0,255,136,0.3)">STREAMING</span>
+    </div>
+
+    <div class="log-terminal" id="log" aria-live="polite"></div>
+  </section>
+
+</main>
 
 <script>
 const $ = id => document.getElementById(id);
 let ws = null;
 const send = (cmd, extra={}) => ws?.readyState===1 && ws.send(JSON.stringify({ t:'ctl', cmd, ...extra }));
-function logLine(s){ const el=$('log'); el.textContent += s + '\n'; el.scrollTop = el.scrollHeight; }
+function logLine(s){
+  const el=$('log');
+  el.textContent += s + '\n';
+  el.scrollTop = el.scrollHeight;
+}
 
 const SETTING_IDS = ['voice','pitch','rate','music','strobe','airhorn','title','subtitle','seatMode','joinOnEnter'];
 function fillSettings(s){
@@ -196,35 +819,58 @@ function readSettings(){
 
 const people = new Map();
 function renderPeople(){
-  const tb=$('peopleBody'); tb.innerHTML='';
+  const tb=$('peopleBody');
+  tb.innerHTML='';
   const list=[...people.values()].sort((a,b)=>b.coins-a.coins || a.name.localeCompare(b.name));
-  if (!list.length){ tb.innerHTML='<tr><td class="hint">Chưa có ai</td><td></td></tr>'; }
+  if (!list.length){
+    tb.innerHTML='<tr><td class="section-hint" style="text-align:center;padding:24px;">Chưa có khách trên sàn nhảy. Bấm Đổ khách mẫu để test.</td><td></td></tr>';
+  }
   list.forEach((p,i)=>{
-    const tr=document.createElement('tr'); tr.style.cursor='pointer'; tr.title='Bấm để chiếu sáng focus trên live';
+    const tr=document.createElement('tr');
+    tr.title='Bấm để chiếu sáng focus trên live';
     tr.onclick=()=>send('focus',{id:p.id});
     const a=document.createElement('td');
     const badge = i===0 && p.coins>0 ? '👑 ' : i===1 && p.coins>0 ? '🥈 ' : i===2 && p.coins>0 ? '🥉 ' : '';
     a.textContent=`${badge}${String(i+1).padStart(2,'0')}  ${p.name}`;
     const b=document.createElement('td');
     b.textContent=p.coins? p.coins+' 💎':'';
-    tr.append(a,b); tb.append(tr);
+    tr.append(a,b);
+    tb.append(tr);
   });
   $('cnt').textContent = `${people.size} khách`;
 }
 
 function setTT(st){
-  const el=$('tt'); el.className='chip ' + (st.status==='connected'?'ok':st.status==='error'?'bad':'');
+  const el=$('tt');
+  const pill=$('ttPill');
+  pill.className = 'tele-pill ' + (st.status==='connected'?'ok':st.status==='error'?'bad':'');
   el.textContent = st.status==='connected' ? `TikTok: @${st.uniqueId} ✓` : st.status==='connecting' ? `TikTok: đang kết nối @${st.uniqueId}…` : st.status==='error' ? 'TikTok: lỗi kết nối' : 'TikTok: chưa kết nối';
 }
 
 function connect(){
   ws = new WebSocket(`ws://${location.host}/ws?role=control`);
-  ws.onopen = () => { $('srv').textContent='Server: đang chạy'; $('srv').className='chip ok'; };
-  ws.onclose = () => { $('srv').textContent='Server: mất kết nối'; $('srv').className='chip bad'; setTimeout(connect, 2000); };
+  ws.onopen = () => {
+    $('srv').textContent='Server: đang chạy';
+    $('srvPill').className='tele-pill ok';
+  };
+  ws.onclose = () => {
+    $('srv').textContent='Server: mất kết nối';
+    $('srvPill').className='tele-pill bad';
+    setTimeout(connect, 2000);
+  };
   ws.onmessage = e => {
     const m = JSON.parse(e.data);
-    if (m.t==='state'){ fillSettings(m.settings); setTT(m.tiktok); people.clear(); for (const v of m.viewers) people.set(v.id,v); renderPeople(); }
-    else if (m.t==='logs'){ $('log').textContent=''; m.lines.forEach(logLine); }
+    if (m.t==='state'){
+      fillSettings(m.settings);
+      setTT(m.tiktok);
+      people.clear();
+      for (const v of m.viewers) people.set(v.id,v);
+      renderPeople();
+    }
+    else if (m.t==='logs'){
+      $('log').textContent='';
+      m.lines.forEach(logLine);
+    }
     else if (m.t==='log') logLine(m.line);
     else if (m.t==='tiktok') setTT(m);
     else if (m.t==='join'){ people.set(m.v.id,m.v); renderPeople(); }
@@ -248,6 +894,8 @@ $('btnBots').onclick = () => send('bots', { on: $('btnBots').textContent.include
 $('btnSay').onclick = () => send('say', { text: $('sayText').value });
 $('btnStrobe').onclick = () => send('strobe');
 $('btnAirhorn').onclick = () => send('airhorn');
+$('btnSmoke').onclick = () => send('smoke');
+$('btnToastAll').onclick = () => send('toast');
 for (const k of SETTING_IDS) $(k).addEventListener('change', () => send('settings', { settings: readSettings() }));
 </script>
 </body>

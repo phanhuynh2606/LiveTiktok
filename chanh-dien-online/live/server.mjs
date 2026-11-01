@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
-import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
+import { EdgeTTS } from '@andresaya/edge-tts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');            // repo root: serves /assets, /live
@@ -25,9 +25,10 @@ const settings = {
   subtitle: 'Nam Mô A Di Đà Phật',
   voice: 'vi-VN-NamMinhNeural',      // or vi-VN-HoaiMyNeural
   pitch: -18,                        // Hz
-  rate: -20,                         // %
+  rate: -4,                          // %
   music: true, mo: true, moBpm: 52,
   autoChant: true, chantEveryMin: 3,
+  likeMilestone: 100,                // mốc tim gõ chuông (mỗi N tim, 0 = tắt)
   seatMode: 'auto',                  // tự mở rộng: 24 (ít người, thoáng) -> 36 -> 64 -> 100 (đông người)
   joinOnEnter: false,                // also seat viewers who only enter the room
   gifts: { readAll: true, minDiamonds: 1 },
@@ -88,6 +89,33 @@ function onChat(id, name, text, avatar){
   broadcast({ t:'chat', id, name: v.name, text, bow: isBow });
 }
 
+let totalLikes = 0;
+function onLike(id, n = 1, reportedTotal = 0){
+  const count = Math.max(1, +n || 1);
+  const prev = totalLikes;
+  if (reportedTotal && reportedTotal > totalLikes) {
+    if (prev === 0 && reportedTotal >= (+settings.likeMilestone || 100)) {
+      totalLikes = reportedTotal;
+      broadcast({ t:'like', id, n: count, totalLikes });
+      return;
+    }
+    totalLikes = reportedTotal;
+  } else {
+    totalLikes += count;
+  }
+  broadcast({ t:'like', id, n: count, totalLikes });
+  const milestone = +settings.likeMilestone || 0;
+  if (milestone > 0) {
+    const prevStep = Math.floor(prev / milestone);
+    const currStep = Math.floor(totalLikes / milestone);
+    if (currStep > prevStep) {
+      const reached = currStep * milestone;
+      broadcast({ t:'bell', big: true, milestone: reached });
+      addLog(`🔔 Đạt mốc ${reached.toLocaleString('vi-VN')} lượt tim · Thỉnh đại hồng chung!`);
+    }
+  }
+}
+
 const BUDDHIST_GIFTS = {
   // Nhóm Hoa & Hương
   rose: 'đóa hoa tươi cúng Phật', 'hoa hồng': 'đóa hoa tươi cúng Phật', 'bông hồng': 'đóa hoa tươi cúng Phật',
@@ -135,7 +163,7 @@ function onGift(id, name, rawGift, count, diamonds, avatar){
   const tier = coins >= 99 ? 3 : coins >= 10 ? 2 : 1;
   const fortune = pickFortune();
   const line = `Nam mô A Di Đà Phật. Cảm niệm công đức Phật tử ${spoken(v.name)} thành tâm cúng dường ${giftName}${count > 1 ? ', ' + count + ' phần' : ''}. ${prayer}.`;
-  broadcast({ t:'gift', id, name: v.name, giftName, count, coins, total: v.coins, tier, prayer, fortune });
+  broadcast({ t:'gift', id, name: v.name, giftName, count, coins, total: v.coins, tier, prayer, fortune, avatar: v.avatar });
   addLog(`🎁 ${v.name} cúng dường ${giftName} · Gieo được ${fortune.num}`);
   if (settings.gifts.readAll || coins >= settings.gifts.minDiamonds) say(line, { tag:'gift', id });
 }
@@ -162,23 +190,29 @@ const spoken = s => String(s).replace(/[_@.]+/g, ' ').replace(/[^\p{L}\p{N}\s]/g
 
 /* ------------------------------------------------------------------ TTS */
 const ttsQueue = []; let ttsBusy = false, ttsSeq = 0;
-function esc(s){ return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c])); }
-function say(text, meta = {}){ if (ttsQueue.length >= 15) { addLog('Hàng đợi giọng đọc đầy, bỏ qua 1 câu'); return; } ttsQueue.push({ text: String(text).slice(0, 500), meta }); pumpTTS(); }
+function say(text, meta = {}){ while (ttsQueue.length >= 2) ttsQueue.shift(); ttsQueue.push({ text: String(text).slice(0, 250), meta }); pumpTTS(); }
 async function pumpTTS(){
   if (ttsBusy || !ttsQueue.length) return; ttsBusy = true;
   const { text, meta } = ttsQueue.shift();
-  try {
-    const file = `tts_${Date.now()}_${++ttsSeq}.mp3`;
-    const tts = new MsEdgeTTS();
-    await tts.setMetadata(settings.voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
-    const { audioStream } = tts.toStream(esc(text), { pitch: `${settings.pitch >= 0 ? '+' : ''}${settings.pitch}Hz`, rate: `${settings.rate >= 0 ? '+' : ''}${settings.rate}%` });
-    const chunks = [];
-    await new Promise((res, rej) => { audioStream.on('data', c => chunks.push(c)); audioStream.on('close', res); audioStream.on('error', rej); });
-    try { tts.close(); } catch {}
-    fs.writeFileSync(path.join(TTS_DIR, file), Buffer.concat(chunks));
-    broadcast({ t:'tts', url: `/live/tts/${file}`, text, ...meta });
-    const old = fs.readdirSync(TTS_DIR).sort(); while (old.length > 40) { try { fs.unlinkSync(path.join(TTS_DIR, old.shift())); } catch {} }
-  } catch (e) { addLog('TTS lỗi: ' + (e?.message || e)); }
+  for (let attempt = 0; attempt < 3; attempt++){
+    try {
+      const file = `tts_${Date.now()}_${++ttsSeq}.mp3`;
+      const tts = new EdgeTTS();
+      await tts.synthesize(text, settings.voice, {
+        pitch: `${settings.pitch >= 0 ? '+' : ''}${settings.pitch}Hz`,
+        rate: `${settings.rate >= 0 ? '+' : ''}${settings.rate}%`
+      });
+      const buf = tts.toBuffer();
+      if (!buf || !buf.length) throw new Error('Dữ liệu âm thanh trống');
+      fs.writeFileSync(path.join(TTS_DIR, file), buf);
+      broadcast({ t:'tts', url: `/live/tts/${file}`, text, ...meta });
+      const old = fs.readdirSync(TTS_DIR).sort(); while (old.length > 40) { try { fs.unlinkSync(path.join(TTS_DIR, old.shift())); } catch {} }
+      break;
+    } catch (e) {
+      if (attempt === 2) addLog('TTS lỗi: ' + (e?.message || e));
+      else await new Promise(r => setTimeout(r, 400));
+    }
+  }
   ttsBusy = false; setTimeout(pumpTTS, 50);
 }
 
@@ -207,7 +241,7 @@ async function connectTikTok(uniqueId){
   try {
     TikTokLib ||= await import('tiktok-live-connector');
     const { TikTokLiveConnection, WebcastEvent, ControlEvent } = TikTokLib;
-    const conn = new TikTokLiveConnection(uniqueId, { enableExtendedGiftInfo: false, processInitialData: false });
+    const conn = new TikTokLiveConnection(uniqueId, { enableExtendedGiftInfo: false, processInitialData: false, requestPollingIntervalMs: 400 });
     const av = u => u?.avatarThumb?.urlList?.[0] || u?.avatarMedium?.urlList?.[0] || u?.profilePicture?.url?.[0] || '';
     const nm = u => u?.nickname || u?.displayId || u?.uniqueId || 'ẩn danh';
     const uid = u => u?.id || u?.displayId || u?.uniqueId || u?.userId || nm(u);
@@ -222,8 +256,13 @@ async function connectTikTok(uniqueId){
       addLog(`🎁 ${nm(d.user)} cúng dường ${viGift(gname)} x${d.repeatCount || 1}`);
     });
     conn.on(WebcastEvent.MEMBER, d => { if (settings.joinOnEnter) seat(uid(d.user), nm(d.user), { avatar: av(d.user) }); });
-    conn.on(WebcastEvent.LIKE, d => broadcast({ t:'like', id: uid(d.user), n: d.count || d.likeCount || 1 }));
-    conn.on(ControlEvent.DISCONNECTED, () => { tiktokState = { ...tiktokState, status: 'disconnected' }; broadcast({ t:'tiktok', ...tiktokState }); addLog('TikTok: mất kết nối'); });
+    conn.on(WebcastEvent.LIKE, d => onLike(uid(d.user), d.count || d.likeCount || 1, d.totalLikeCount));
+    conn.on(ControlEvent.DISCONNECTED, () => {
+      tiktokState = { ...tiktokState, status: 'disconnected' };
+      broadcast({ t:'tiktok', ...tiktokState });
+      addLog('TikTok: mất kết nối, tự kết nối lại sau 5s...');
+      if (tiktok === conn) setTimeout(() => { if (tiktokState.status === 'disconnected') connectTikTok(uniqueId); }, 5000);
+    });
     conn.on(ControlEvent.ERROR, e => addLog('TikTok lỗi: ' + (e?.info || e?.message || e)));
     const st = await conn.connect();
     tiktok = conn;
@@ -235,7 +274,7 @@ async function connectTikTok(uniqueId){
   }
   broadcast({ t:'tiktok', ...tiktokState });
 }
-async function disconnectTikTok(){ if (tiktok){ try { await tiktok.disconnect(); } catch {} tiktok = null; } tiktokState = { status:'idle', uniqueId:'', error:'' }; broadcast({ t:'tiktok', ...tiktokState }); }
+async function disconnectTikTok(){ totalLikes = 0; const prev = tiktok; tiktok = null; if (prev){ try { await prev.disconnect(); } catch {} } tiktokState = { status:'idle', uniqueId:'', error:'' }; broadcast({ t:'tiktok', ...tiktokState }); }
 
 /* ------------------------------------------------------------- test data */
 const DEMO_NAMES = ['Diệu Hạnh','Minh Tâm','Thiện Đức','Huệ An','Tịnh Nhã','Quảng Trí','Chơn Như','Pháp Hỷ','Nguyên Thanh','Tâm Đăng','Diệu Liên','Trí Hải','Phước Lộc','Hạnh Nguyện','Như Ý','Bảo Châu','Thanh Lương','Từ Tâm','An Lạc','Giác Hoa','Tuệ Minh','Liên Hương','Thu Hà','Ngọc Lan','Đức Anh','Hải Đăng','Mai Anh','Phương Thảo','Trung Kiên','Quang Huy','Bảo Ngọc','Diệu Linh'];
@@ -247,7 +286,7 @@ function fillDemo(n){
     seat('demo_' + i, name, { demo: true, skin: ['man','woman','woman','man','granny','monk','nun','child'][i % 8] });
   }
 }
-function clearSeats(){ viewers.clear(); broadcast(snapshot()); addLog('Đã làm trống bồ đoàn'); }
+function clearSeats(){ viewers.clear(); totalLikes = 0; broadcast(snapshot()); addLog('Đã làm trống bồ đoàn'); }
 
 /* ------------------------------------------------------------- control */
 function onControl(m){
@@ -256,6 +295,7 @@ function onControl(m){
     case 'disconnect': disconnectTikTok(); addLog('Đã ngắt kết nối TikTok'); break;
     case 'chat': { const n = String(m.name || 'Khách').slice(0, 18); onChat('sim_' + n, n, String(m.text || 'Nam mô A Di Đà Phật').slice(0, 120)); break; }
     case 'gift': { const n = String(m.name || 'Khách').slice(0, 18); onGift('sim_' + n, n, String(m.gift || 'Hoa hồng').slice(0, 30), clamp(m.count, 1, 99), clamp(m.diamonds, 1, 50000)); break; }
+    case 'like': onLike('sim_' + String(m.name || 'Khách').slice(0, 18), clamp(m.n, 1, 1000)); break;
     case 'fill': fillDemo(clamp(m.n, 1, 100)); addLog(`Đổ người mẫu: ${viewers.size} người`); break;
     case 'clear': clearSeats(); break;
     case 'focus': broadcast({ t:'focus', id: m.id }); break;
@@ -275,6 +315,7 @@ const SETTING_RULES = {
   title: v => String(v).slice(0, 40), subtitle: v => String(v).slice(0, 60),
   voice: v => ['vi-VN-NamMinhNeural', 'vi-VN-HoaiMyNeural'].includes(v) ? v : settings.voice,
   pitch: v => clamp(v, -50, 50), rate: v => clamp(v, -50, 50), moBpm: v => clamp(v, 20, 120), chantEveryMin: v => clamp(v, 1, 60),
+  likeMilestone: v => clamp(v, 0, 100000),
   music: Boolean, mo: Boolean, autoChant: Boolean, joinOnEnter: Boolean,
   seatMode: v => ['auto', '24', '36', '64', '100'].includes(String(v)) ? String(v) : 'auto',
 };
@@ -295,7 +336,7 @@ function setBots(on, n, pace){
       const ids = [...viewers.keys()].filter(id => id.startsWith('bot_')); if (!ids.length) return;
       const id = ids[Math.floor(Math.random() * ids.length)], v = viewers.get(id), r = Math.random();
       if (r < .62) onChat(id, v.name, BOT_LINES[Math.floor(Math.random() * BOT_LINES.length)]);
-      else if (r < .9) broadcast({ t:'like', id, n: 1 + Math.floor(Math.random() * 4) });
+      else if (r < .9) onLike(id, 1 + Math.floor(Math.random() * 4));
       else if (r < .985) onGift(id, v.name, 'Hoa hồng', 1 + Math.floor(Math.random() * 3), 1);
       else onGift(id, v.name, 'Đèn hoa sen', 1, 99);
     }, every);

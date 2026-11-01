@@ -1,0 +1,1366 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thả Thuyền Hoa Đăng Cầu Nguyện · TikTok LIVE</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,600;0,700;1,400&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --gold: #f5c469;
+  --gold-glow: rgba(245, 196, 105, 0.4);
+  --lotus-pink: #ff7597;
+  --text-main: #fcf6e8;
+  --display: "Noto Serif", Georgia, serif;
+  --body: "Be Vietnam Pro", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden; background: #040812;
+  font-family: var(--body); color: var(--text-main); user-select: none;
+}
+#fit { position: fixed; inset: 0; overflow: hidden; }
+#stage {
+  position: absolute; left: 50%; top: 50%; width: 1080px; height: 1920px;
+  transform-origin: center center; overflow: hidden; background: #040812;
+}
+#c { position: absolute; inset: 0; width: 1080px; height: 1920px; z-index: 1; }
+.ui { position: absolute; z-index: 10; pointer-events: none; }
+
+/* Header Plaque */
+#plaque {
+  left: 80px; right: 80px; top: 60px; height: 140px;
+  border: 2px solid rgba(245, 196, 105, 0.7); border-radius: 26px;
+  background: linear-gradient(180deg, rgba(8, 20, 36, 0.9), rgba(4, 10, 20, 0.9));
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 25px var(--gold-glow) inset;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+#title {
+  font-family: var(--display); font-weight: 700; font-size: 50px;
+  letter-spacing: 0.08em; color: var(--gold); text-transform: uppercase;
+  text-shadow: 0 2px 4px #000, 0 0 25px rgba(245, 196, 105, 0.5);
+}
+#subtitle {
+  font-family: var(--display); font-size: 24px; letter-spacing: 0.14em;
+  color: #d6e2f0; opacity: 0.9;
+}
+
+/* Stats Pill */
+#pills { top: 220px; left: 0; right: 0; display: flex; justify-content: center; gap: 20px; }
+.pill {
+  background: rgba(6, 16, 30, 0.85); border: 1.5px solid rgba(245, 196, 105, 0.5);
+  border-radius: 999px; padding: 10px 26px; font-size: 28px; font-weight: 600;
+  display: flex; align-items: center; gap: 12px; backdrop-filter: blur(8px);
+}
+.dot { width: 16px; height: 16px; border-radius: 50%; background: #46d36b; box-shadow: 0 0 10px #46d36b; }
+
+/* Guide HUD Card */
+#guide {
+  left: 30px; top: 310px; width: 340px; padding: 16px 18px;
+  background: rgba(6, 16, 30, 0.85); border: 1.5px solid rgba(245, 196, 105, 0.45);
+  border-radius: 22px; backdrop-filter: blur(10px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(245, 196, 105, 0.12) inset;
+}
+.g-hdr {
+  font-family: var(--display); font-size: 19px; font-weight: 700;
+  letter-spacing: 0.1em; color: var(--gold); text-align: center;
+  margin-bottom: 10px; text-shadow: 0 0 12px rgba(245, 196, 105, 0.4);
+}
+.g-sec {
+  font-size: 14px; font-weight: 700; color: #9bb7d4; letter-spacing: 0.08em;
+  text-transform: uppercase; margin: 8px 0 6px 0; border-bottom: 1px solid rgba(245, 196, 105, 0.2);
+  padding-bottom: 4px;
+}
+.g-sec.gold { color: #f5c469; margin-top: 12px; }
+.g-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 0; font-size: 16px;
+}
+.chip {
+  background: rgba(245, 196, 105, 0.16); border: 1px solid rgba(245, 196, 105, 0.45);
+  color: #ffe890; font-weight: 600; font-size: 15px; padding: 2px 8px; border-radius: 6px;
+}
+.chip.heart { background: rgba(255, 91, 121, 0.16); border-color: rgba(255, 91, 121, 0.45); color: #ff9cb0; }
+.gift-tag {
+  background: rgba(255, 215, 0, 0.16); border: 1px solid rgba(255, 215, 0, 0.5);
+  color: #ffd700; font-weight: 700; font-size: 15px; padding: 2px 8px; border-radius: 6px;
+}
+.gift-tag.dragon {
+  background: linear-gradient(90deg, rgba(230, 81, 0, 0.25), rgba(255, 215, 0, 0.25));
+  border-color: #ffd700; color: #fff1a8;
+}
+.desc { color: #eaf1fa; font-size: 15px; text-align: right; }
+.desc.gold { color: #ffe680; font-weight: 600; }
+.desc.dragon { color: #ffd700; font-weight: 700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
+
+/* Bảng Công Đức HUD Card (Đối xứng bên phải, đồng bộ với Cẩm Nang) */
+#merit {
+  right: 30px; top: 310px; width: 320px; padding: 16px 18px;
+  background: rgba(6, 16, 30, 0.85); border: 1.5px solid rgba(245, 196, 105, 0.45);
+  border-radius: 22px; backdrop-filter: blur(10px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(245, 196, 105, 0.12) inset;
+  text-align: center;
+}
+.m-hdr {
+  font-family: var(--display); font-size: 19px; font-weight: 700;
+  letter-spacing: 0.1em; color: var(--gold); text-align: center;
+  margin-bottom: 12px; text-shadow: 0 0 12px rgba(245, 196, 105, 0.4);
+}
+#merit ol { margin: 0; padding: 0; list-style: none; text-align: left; display: grid; gap: 8px; }
+#merit li {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 16px; padding: 4px 0; border-bottom: 1px solid rgba(245, 196, 105, 0.15);
+}
+#merit li:last-child { border-bottom: none; }
+#merit .m-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
+#merit .m-rank { color: var(--gold); font-weight: 700; font-size: 16px; min-width: 22px; }
+#merit .m-av { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--gold); flex-shrink: 0; }
+#merit .m-badge {
+  width: 30px; height: 30px; border-radius: 50%; background: #3d160c;
+  color: #ffd98a; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; border: 1.5px solid var(--gold); flex-shrink: 0;
+}
+#merit .m-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-weight: 600; font-size: 16px; }
+#merit .m-coins { color: #ffd700; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+#merit .empty { color: #8fa5be; text-align: center; font-style: italic; padding: 18px 0; font-size: 15px; }
+
+/* Gift / Donate Banner */
+#giftBanner {
+  left: 70px; right: 70px; top: 380px; padding: 24px 34px; text-align: center;
+  border-radius: 26px; border: 2.5px solid var(--gold);
+  background: radial-gradient(ellipse at 50% 0%, rgba(130, 45, 25, 0.96), rgba(35, 12, 10, 0.96));
+  box-shadow: 0 0 55px rgba(255, 190, 80, 0.5); opacity: 0; transform: scale(0.85);
+  transition: opacity 0.45s, transform 0.45s cubic-bezier(0.2, 1.4, 0.4, 1); z-index: 45;
+}
+#giftBanner.show { opacity: 1; transform: none; }
+#giftBanner .tag { font-family: var(--display); font-size: 24px; letter-spacing: 0.15em; color: #ffe680; }
+#giftBanner .who { font-family: var(--display); font-weight: 700; font-size: 48px; color: #fff; margin: 4px 0; }
+#giftBanner .what { font-size: 30px; color: var(--gold); }
+#giftBanner .pray { font-family: var(--display); font-style: italic; font-size: 25px; margin-top: 8px; color: #fdf3d8; }
+
+/* Dragon Banner */
+#dragonBanner {
+  left: 60px; right: 60px; top: 400px; padding: 26px 36px; text-align: center;
+  border-radius: 28px; border: 3px solid #ffd700;
+  background: radial-gradient(ellipse at 50% 0%, rgba(180, 120, 20, 0.96), rgba(40, 20, 5, 0.96));
+  box-shadow: 0 0 60px rgba(255, 215, 0, 0.7); opacity: 0; transform: scale(0.85);
+  transition: opacity 0.5s, transform 0.5s cubic-bezier(0.2, 1.4, 0.4, 1); z-index: 50;
+}
+#dragonBanner.show { opacity: 1; transform: none; }
+#dragonBanner .tag { font-family: var(--display); font-size: 26px; letter-spacing: 0.15em; color: #ffe680; }
+#dragonBanner .who { font-family: var(--display); font-weight: 700; font-size: 52px; color: #fff; margin: 4px 0; }
+#dragonBanner .what { font-size: 32px; color: var(--gold); }
+#dragonBanner .pray { font-family: var(--display); font-style: italic; font-size: 28px; margin-top: 10px; color: #fdf3d8; }
+
+/* Footer quotes */
+#quote {
+  left: 40px; right: 40px; bottom: 30px; text-align: center;
+  font-family: var(--display); font-style: italic; font-size: 25px;
+  color: rgba(246, 233, 207, 0.85); text-shadow: 0 2px 6px #000;
+}
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage">
+  <canvas id="c" width="1080" height="1920"></canvas>
+
+  <div id="plaque" class="ui">
+    <div id="title">Thả Thuyền Hoa Đăng</div>
+    <div id="subtitle">Cầu Nguyện An Lành · Vạn Sự Cát Tường</div>
+  </div>
+
+  <div id="pills" class="ui">
+    <div class="pill">
+      <span class="dot"></span>
+      <span id="counter">0</span>
+      <span style="font-size: 19px; color: #d6e2f0;">đèn hoa đăng</span>
+    </div>
+    <div class="pill">
+      <span style="color: #ff5b79; font-size: 24px;">❤️</span>
+      <span id="likeCount">0</span>
+      <span id="likeGoal" style="font-size: 19px; color: #f5c469;">/ 100 tim</span>
+    </div>
+  </div>
+
+  <div id="guide" class="ui">
+    <div class="g-hdr">✦ CẨM NANG CẦU NGUYỆN ✦</div>
+
+    <div class="g-sec">💬 LỆNH BÌNH LUẬN</div>
+    <div class="g-row"><span class="chip">dâng hương</span><span class="desc">Thắp hương cầu an</span></div>
+    <div class="g-row"><span class="chip">lễ Phật</span><span class="desc">Đảnh lễ trang nghiêm</span></div>
+    <div class="g-row"><span class="chip">đèn trời</span><span class="desc">Thả đèn bay lên trăng</span></div>
+    <div class="g-row"><span class="chip">lời chúc...</span><span class="desc">Thả hoa sen theo tên</span></div>
+    <div class="g-row"><span class="chip heart">thả tim ❤️</span><span class="desc">Mở khóa 4 Mốc Đại Lễ</span></div>
+
+    <div class="g-sec gold">🎁 CÚNG DƯỜNG & TRIỆU HỒI</div>
+    <div class="g-row"><span class="gift-tag">🌹 1 xu</span><span class="desc gold">Sen Ngọc Hoàng Kim</span></div>
+    <div class="g-row"><span class="gift-tag">🪷 30 xu</span><span class="desc gold">Mandala + Thiên Quang</span></div>
+    <div class="g-row"><span class="gift-tag dragon">🐉 99+ xu</span><span class="desc dragon">Triệu Hồi Thuyền Rồng</span></div>
+  </div>
+
+  <div id="merit" class="ui">
+    <div class="m-hdr">✦ BẢNG CÔNG ĐỨC ✦</div>
+    <ol id="meritList"><li class="empty">Chưa có công đức</li></ol>
+  </div>
+
+  <div id="giftBanner" class="ui">
+    <div class="tag">✦ CÔNG ĐỨC CÚNG DƯỜNG ✦</div>
+    <div class="who" id="giftWho">Phật Tử</div>
+    <div class="what" id="giftWhat">Cúng dường Hoa Hồng x1</div>
+    <div class="pray" id="giftPray">Nguyện cầu gia đạo bình an, vạn sự hanh thông</div>
+  </div>
+
+  <div id="dragonBanner" class="ui">
+    <div class="tag">✦ ĐẠI LỄ TRIỆU HỒI THUYỀN RỒNG VÀNG ✦</div>
+    <div class="who" id="dragonWho">Đại Thí Chủ</div>
+    <div class="what" id="dragonWhat">Cúng dường Lễ Vật</div>
+    <div class="pray" id="dragonPray">Cầu gia đạo bình an, vạn sự hanh thông</div>
+  </div>
+
+  <div id="quote" class="ui">“Nến sáng tỏ lòng thành, nước trôi vạn muộn phiền.”</div>
+</div></div>
+
+<script>
+/* ======================= Stage Resize ======================= */
+const stage = document.getElementById('stage');
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+}
+addEventListener('resize', fit);
+fit();
+
+/* ======================= Canvas & Assets ======================= */
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+const IMGS = {};
+function loadImg(name, paths) {
+  const img = new Image();
+  let idx = 0;
+  function tryNext() {
+    if (idx < paths.length) {
+      img.src = paths[idx++];
+    } else {
+      // Tự động thử lại nếu server vừa khởi động lại
+      setTimeout(() => { idx = 0; tryNext(); }, 2000);
+    }
+  }
+  img.onload = () => {
+    IMGS[name] = img;
+    console.log('✅ Loaded asset:', name, img.src);
+  };
+  img.onerror = tryNext;
+  tryNext();
+}
+loadImg('bg', ['../assets/bg_river.png', '/assets/bg_river.png']);
+loadImg('lotus', ['../assets/fx_lotus_candle.png', '/assets/fx_lotus_candle.png']);
+loadImg('dragon', ['../assets/fx_dragon_boat.png', '/assets/fx_dragon_boat.png']);
+loadImg('anim_woman', ['../assets/anim_woman.png', '/assets/anim_woman.png']);
+loadImg('anim_man', ['../assets/anim_man.png', '/assets/anim_man.png']);
+
+const ANIM = {
+  man: { fw: 209, fh: 550 },
+  woman: { fw: 209, fh: 550 }
+};
+
+/* ======================= River & Lantern Simulation ======================= */
+const HORIZON_Y = 920;   // Đường chân trời tiếp giáp chùa cổ
+const BOTTOM_Y = 1920;  // Đáy khung hình
+
+// Tọa độ cầu thang đá & luồng sông chuẩn theo 2 mũi tên định hướng:
+// 1. Mũi tên XANH (Người): Từ chân bậc thang (X: 320, Y: 1820) ➔ Chiếu nghỉ mép nước (X: 620, Y: 1620)
+// 2. Điểm thả đèn sen: X: 680, Y: 1620 (hoàn toàn trên mặt nước, không dính đá)
+// 3. Mũi tên ĐỎ (Thuyền Rồng): Từ góc dưới phải (X: 1120, Y: 1600) ➔ Lướt chéo lên trên trái qua vệt trăng (X: 480, Y: 960)
+
+const walkerQueue = [];
+const walkers = []; // Người bước xuống cầu thang thả đèn
+const lanterns = [];
+const ripples = [];
+const fireflies = [];
+const petals = [];
+let dragonBoat = null;
+
+// 3 bến thả rải đều dọc theo mép đá bờ nước (X: 560..830, Y: 1620..1680 - theo vệt xanh bến)
+const RELEASE_SLOTS = [
+  { targetX: 560, targetY: 1630, releaseX: 660, releaseY: 1620 }, // Bến 1: Phía trên gần lan can
+  { targetX: 635, targetY: 1665, releaseX: 745, releaseY: 1650 }, // Bến 2: Giữa bậc thang đá
+  { targetX: 710, targetY: 1705, releaseX: 830, releaseY: 1680 }, // Bến 3: Phía dưới thoải ra nước
+];
+let slotCounter = 0;
+function getNextSlot() {
+  for (let i = 0; i < RELEASE_SLOTS.length; i++) {
+    const idx = (slotCounter + i) % RELEASE_SLOTS.length;
+    if (!walkers.some(w => w.slotIdx === idx)) {
+      slotCounter = (idx + 1) % RELEASE_SLOTS.length;
+      return { slot: RELEASE_SLOTS[idx], idx };
+    }
+  }
+  const idx = slotCounter % RELEASE_SLOTS.length;
+  slotCounter = (slotCounter + 1) % RELEASE_SLOTS.length;
+  return { slot: RELEASE_SLOTS[idx], idx };
+}
+
+function spawnLanternItem(item) {
+  // Cho phép tối đa 3 người thả đồng thời ở 3 vị trí riêng biệt không đè lên nhau
+  if (walkers.length >= 3) {
+    if (walkerQueue.length < 25) {
+      walkerQueue.push(item);
+    } else {
+      releaseLanternDirectly(item);
+    }
+    return;
+  }
+  startWalker(item);
+}
+
+function startWalker(item) {
+  const skin = Math.random() > 0.5 ? 'woman' : 'man';
+  const { slot, idx } = getNextSlot();
+  walkers.push({
+    ...item,
+    skin,
+    slotIdx: idx,
+    x: 320,
+    y: 1820,
+    startX: 320,
+    startY: 1820,
+    targetX: slot.targetX,
+    targetY: slot.targetY,
+    releaseX: slot.releaseX,
+    releaseY: slot.releaseY,
+    progress: 0,
+    frame: 0,
+    ft: 0,
+    state: 'walk_down', // Đi dọc theo bậc thang đá xuống mép nước
+    stateTimer: 0,
+    fade: 0,
+    scale: 0.44,
+  });
+  updateCounter();
+}
+
+function releaseLanternDirectly(item) {
+  // Thả trực tiếp phân bổ trên dòng sông đang lững lờ trôi
+  const ry = 800 + Math.random() * 800;
+  const spreadX = (Math.random() - 0.5) * 80;
+  lanterns.push({
+    ...item,
+    x: 730,
+    y: ry,
+    startX: 730,
+    startY: 1640,
+    spreadX,
+    speedY: 1.15 + Math.random() * 0.35,
+    swayPhase: Math.random() * Math.PI * 2,
+    swaySpeed: 0.015 + Math.random() * 0.02,
+    swayAmp: 12 + Math.random() * 16,
+    flamePhase: Math.random() * 10,
+    alpha: 0.85,
+  });
+  updateCounter();
+}
+
+function releaseLanternToWater(item, releaseX, releaseY) {
+  // Đèn sen xuất phát trên mặt nước sát bờ sông ngay trước tay người thả (X: 730, Y: 1640)
+  const speedY = 1.15 + Math.random() * 0.35;
+  const swayAmp = 12 + Math.random() * 16;
+  const spreadX = (Math.random() - 0.5) * 60;
+  const l = {
+    ...item,
+    x: releaseX,
+    y: releaseY,
+    startX: releaseX,
+    startY: releaseY,
+    spreadX,
+    speedY,
+    swayPhase: Math.random() * Math.PI * 2,
+    swaySpeed: 0.015 + Math.random() * 0.02,
+    swayAmp,
+    flamePhase: Math.random() * 10,
+    alpha: 0,
+  };
+  lanterns.push(l);
+
+  // Bắn sóng nước lan tỏa khi chạm mặt nước
+  for (let k = 0; k < 3; k++) {
+    ripples.push({
+      x: releaseX,
+      y: releaseY + 8,
+      r: 8 + k * 8,
+      vr: 1.4 + Math.random() * 0.8,
+      alpha: 0.8,
+    });
+  }
+  bell(false);
+  updateCounter();
+  return l;
+}
+
+/* ======================= Sky Lantern (Đèn Trời) ======================= */
+const skyLanterns = [];
+function spawnSkyLantern(name) {
+  skyLanterns.push({
+    x: 460 + Math.random() * 220,
+    y: 1650,
+    vx: (Math.random() - 0.5) * 0.8,
+    vy: 1.8 + Math.random() * 0.9,
+    scale: 0.85,
+    name: name || 'Cầu bình an',
+    alpha: 0.95,
+    wobble: Math.random() * Math.PI * 2,
+  });
+}
+
+/* ======================= Gift / Donate Banner ======================= */
+function showGiftBanner(name, giftName, count, prayer) {
+  const banner = document.getElementById('giftBanner');
+  document.getElementById('giftWho').textContent = name;
+  document.getElementById('giftWhat').textContent = `Cúng dường ${giftName} ${count > 1 ? 'x' + count : ''}`;
+  document.getElementById('giftPray').textContent = prayer || 'Cầu gia đạo bình an, vạn sự hanh thông';
+  banner.classList.add('show');
+  bell(false);
+
+  // Mưa cánh hoa chúc phúc
+  for (let i = 0; i < 28; i++) {
+    petals.push({
+      x: 350 + Math.random() * 520,
+      y: 750 + Math.random() * 400,
+      vx: (Math.random() - 0.5) * 1.6,
+      vy: 1.3 + Math.random() * 1.8,
+      rot: Math.random() * Math.PI,
+      vrot: (Math.random() - 0.5) * 0.05,
+      size: 10 + Math.random() * 10,
+      color: Math.random() > 0.5 ? '#ffd700' : '#ff7597',
+      life: 260,
+    });
+  }
+
+  setTimeout(() => { banner.classList.remove('show'); }, 6500);
+}
+
+function updateCounter() {
+  document.getElementById('counter').textContent = lanterns.length;
+}
+
+/* ======================= Bảng Công Đức ======================= */
+const meritViewers = new Map();
+
+function updateMerit(list) {
+  if (Array.isArray(list)) {
+    list.forEach(v => {
+      if (v && v.coins > 0) meritViewers.set(v.id || v.name, v);
+    });
+  }
+  renderMerit();
+}
+
+function recordMerit(id, name, coins, avatar) {
+  const key = id || name;
+  const cur = meritViewers.get(key) || { id: key, name: name || 'Phật tử', coins: 0, avatar: avatar || '' };
+  cur.coins += (coins || 1);
+  if (avatar) cur.avatar = avatar;
+  meritViewers.set(key, cur);
+  renderMerit();
+}
+
+function renderMerit() {
+  const top = [...meritViewers.values()]
+    .filter(v => v.coins > 0)
+    .sort((a, b) => b.coins - a.coins)
+    .slice(0, 5);
+  const ol = document.getElementById('meritList');
+  if (!ol) return;
+  ol.innerHTML = '';
+  if (!top.length) {
+    ol.innerHTML = '<li class="empty">Chưa có công đức</li>';
+    return;
+  }
+  const medals = ['🥇', '🥈', '🥉', '4.', '5.'];
+  top.forEach((v, i) => {
+    const li = document.createElement('li');
+    const left = document.createElement('div');
+    left.className = 'm-left';
+
+    const rank = document.createElement('span');
+    rank.className = 'm-rank';
+    rank.textContent = medals[i] || `${i + 1}.`;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'm-name';
+    nameSpan.textContent = v.name || 'Phật tử';
+
+    left.append(rank);
+    if (v.avatar) {
+      const img = document.createElement('img');
+      img.className = 'm-av';
+      img.src = v.avatar;
+      img.onerror = () => {
+        img.remove();
+        const badge = document.createElement('span');
+        badge.className = 'm-badge';
+        badge.textContent = (v.name || '?').trim().charAt(0).toUpperCase() || '🪷';
+        left.insertBefore(badge, nameSpan);
+      };
+      left.append(img);
+    } else {
+      const badge = document.createElement('span');
+      badge.className = 'm-badge';
+      badge.textContent = (v.name || '?').trim().charAt(0).toUpperCase() || '🪷';
+      left.append(badge);
+    }
+    left.append(nameSpan);
+
+    const coinsSpan = document.createElement('span');
+    coinsSpan.className = 'm-coins';
+    coinsSpan.textContent = `${v.coins} 🪙`;
+
+    li.append(left, coinsSpan);
+    ol.append(li);
+  });
+}
+
+/* ======================= Dragon Boat Event ======================= */
+function triggerDragonBoat(name, giftName, prayer) {
+  // Thuyền rồng đi theo mũi tên ĐỎ: từ góc dưới bên phải (1120, 1600) lướt chéo lên trên bên trái (480, 960)
+  dragonBoat = {
+    startX: 1120,
+    startY: 1600,
+    targetX: 480,
+    targetY: 960,
+    progress: 0,
+    speed: 0.0022,
+    x: 1120,
+    y: 1600,
+    scale: 0.72,
+    name,
+    giftName,
+    prayer,
+    alpha: 0,
+  };
+
+  const banner = document.getElementById('dragonBanner');
+  document.getElementById('dragonWho').textContent = name;
+  document.getElementById('dragonWhat').textContent = `Cúng dường ${giftName}`;
+  document.getElementById('dragonPray').textContent = prayer || 'Cầu gia đạo bình an, vạn sự hanh thông';
+  banner.classList.add('show');
+
+  bell(true);
+
+  // Mưa cánh hoa vàng
+  for (let i = 0; i < 70; i++) {
+    petals.push({
+      x: 350 + Math.random() * 700,
+      y: 800 + Math.random() * 400,
+      vx: (Math.random() - 0.5) * 2,
+      vy: 1.5 + Math.random() * 2.2,
+      rot: Math.random() * Math.PI,
+      vrot: (Math.random() - 0.5) * 0.05,
+      size: 10 + Math.random() * 14,
+      color: Math.random() > 0.4 ? '#ffd700' : '#ff7597',
+      life: 300,
+    });
+  }
+
+  setTimeout(() => { banner.classList.remove('show'); }, 8500);
+}
+
+/* ======================= Render Loop ======================= */
+let time = 0;
+
+function drawBackground() {
+  if (IMGS.bg) {
+    ctx.drawImage(IMGS.bg, 0, 0, 1080, 1920);
+    return;
+  }
+
+  // Fallback vẽ bằng Canvas procedural cực đẹp nếu chưa có ảnh
+  // 1. Trời đêm sâu thẳm
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON_Y);
+  skyGrad.addColorStop(0, '#030712');
+  skyGrad.addColorStop(1, '#091c33');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, 1080, HORIZON_Y);
+
+  // Trăng rằm phát sáng
+  const moonX = 540, moonY = 280, moonR = 90;
+  const moonGlow = ctx.createRadialGradient(moonX, moonY, moonR * 0.8, moonX, moonY, moonR * 3.5);
+  moonGlow.addColorStop(0, 'rgba(255, 245, 210, 0.9)');
+  moonGlow.addColorStop(0.3, 'rgba(255, 230, 160, 0.35)');
+  moonGlow.addColorStop(1, 'rgba(255, 220, 120, 0)');
+  ctx.fillStyle = moonGlow;
+  ctx.beginPath();
+  ctx.arc(moonX, moonY, moonR * 3.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#fff9e6';
+  ctx.beginPath();
+  ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Dòng sông uốn lượn
+  const riverGrad = ctx.createLinearGradient(0, HORIZON_Y, 0, 1920);
+  riverGrad.addColorStop(0, '#071629');
+  riverGrad.addColorStop(0.5, '#04101e');
+  riverGrad.addColorStop(1, '#02070f');
+  ctx.fillStyle = riverGrad;
+  ctx.fillRect(0, HORIZON_Y, 1080, 1920 - HORIZON_Y);
+
+  // Ánh trăng rọi trên mặt nước
+  const streamGrad = ctx.createRadialGradient(540, HORIZON_Y + 400, 50, 540, 1400, 480);
+  streamGrad.addColorStop(0, 'rgba(245, 215, 145, 0.18)');
+  streamGrad.addColorStop(0.6, 'rgba(245, 215, 145, 0.05)');
+  streamGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = streamGrad;
+  ctx.fillRect(0, HORIZON_Y, 1080, 1920 - HORIZON_Y);
+
+  // Gợn sóng lăn tăn nhẹ
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 1.5;
+  for (let y = HORIZON_Y + 30; y < 1920; y += 45) {
+    const sway = Math.sin(time * 0.02 + y * 0.05) * 20;
+    ctx.beginPath();
+    ctx.moveTo(100 + sway, y);
+    ctx.quadraticCurveTo(540 + sway * 1.5, y + 8, 980 + sway, y);
+    ctx.stroke();
+  }
+}
+
+function drawProceduralLotus(scale, tier, flamePhase) {
+  // Cánh sen
+  const isGold = tier >= 2;
+  const petalColor = isGold ? '#ffd700' : '#ff7597';
+  const petalInner = isGold ? '#fff1a8' : '#ffa3b8';
+
+  ctx.save();
+  // Vầng sáng vàng dưới đáy nước
+  const glow = ctx.createRadialGradient(0, 0, 10 * scale, 0, 0, 80 * scale);
+  glow.addColorStop(0, isGold ? 'rgba(255, 215, 0, 0.7)' : 'rgba(255, 150, 180, 0.6)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(0, 0, 80 * scale, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Vẽ 8 cánh hoa sen xòe
+  ctx.fillStyle = petalColor;
+  for (let i = 0; i < 8; i++) {
+    ctx.save();
+    ctx.rotate((i * Math.PI) / 4);
+    ctx.beginPath();
+    ctx.ellipse(0, -32 * scale, 14 * scale, 32 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Lớp cánh nhỏ bên trong
+  ctx.fillStyle = petalInner;
+  for (let i = 0; i < 6; i++) {
+    ctx.save();
+    ctx.rotate((i * Math.PI) / 3 + 0.2);
+    ctx.beginPath();
+    ctx.ellipse(0, -20 * scale, 10 * scale, 22 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Đế đài sen
+  ctx.fillStyle = '#6a4214';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 18 * scale, 10 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ngọn nến thắp sáng lung linh
+  const flicker = Math.sin(time * 0.15 + flamePhase) * 4 * scale;
+  const flameH = (32 + flicker) * scale;
+
+  // Hào quang nến
+  const fGlow = ctx.createRadialGradient(0, -16 * scale, 5 * scale, 0, -25 * scale, 55 * scale);
+  fGlow.addColorStop(0, 'rgba(255, 240, 180, 0.9)');
+  fGlow.addColorStop(0.4, 'rgba(255, 160, 50, 0.45)');
+  fGlow.addColorStop(1, 'transparent');
+  ctx.fillStyle = fGlow;
+  ctx.beginPath();
+  ctx.arc(0, -25 * scale, 55 * scale, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Thân lửa ngoài
+  ctx.fillStyle = '#ff9800';
+  ctx.beginPath();
+  ctx.moveTo(-7 * scale, -10 * scale);
+  ctx.quadraticCurveTo(-10 * scale, -28 * scale, 0, -10 * scale - flameH);
+  ctx.quadraticCurveTo(10 * scale, -28 * scale, 7 * scale, -10 * scale);
+  ctx.closePath();
+  ctx.fill();
+
+  // Ruột lửa trong
+  ctx.fillStyle = '#fff7b2';
+  ctx.beginPath();
+  ctx.moveTo(-4 * scale, -10 * scale);
+  ctx.quadraticCurveTo(-5 * scale, -22 * scale, 0, -10 * scale - flameH * 0.7);
+  ctx.quadraticCurveTo(5 * scale, -22 * scale, 4 * scale, -10 * scale);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawProceduralDragon(scale) {
+  ctx.save();
+  // Vầng quang Phật bao quanh thuyền
+  const halo = ctx.createRadialGradient(0, 0, 80 * scale, 0, 0, 360 * scale);
+  halo.addColorStop(0, 'rgba(255, 230, 120, 0.8)');
+  halo.addColorStop(0.5, 'rgba(255, 180, 30, 0.3)');
+  halo.addColorStop(1, 'transparent');
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(0, 0, 360 * scale, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Thân thuyền rồng hoàng gia dát vàng
+  ctx.fillStyle = '#f5b82e';
+  ctx.strokeStyle = '#fff3a8';
+  ctx.lineWidth = 4 * scale;
+
+  ctx.beginPath();
+  ctx.moveTo(-220 * scale, 20 * scale);
+  ctx.quadraticCurveTo(-140 * scale, 90 * scale, 0, 90 * scale);
+  ctx.quadraticCurveTo(160 * scale, 90 * scale, 250 * scale, 10 * scale);
+  ctx.quadraticCurveTo(270 * scale, -40 * scale, 260 * scale, -80 * scale); // Đầu rồng vươn cao
+  ctx.quadraticCurveTo(220 * scale, -20 * scale, 170 * scale, 10 * scale);
+  ctx.lineTo(-190 * scale, 10 * scale);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Mắt rồng sáng rực
+  ctx.fillStyle = '#ff1a1a';
+  ctx.beginPath();
+  ctx.arc(245 * scale, -60 * scale, 8 * scale, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Lầu son trên thuyền
+  ctx.fillStyle = '#8f2015';
+  ctx.fillRect(-80 * scale, -50 * scale, 160 * scale, 60 * scale);
+  ctx.fillStyle = '#f5b82e';
+  // Mái cong
+  ctx.beginPath();
+  ctx.moveTo(-110 * scale, -50 * scale);
+  ctx.quadraticCurveTo(0, -90 * scale, 110 * scale, -50 * scale);
+  ctx.lineTo(-110 * scale, -50 * scale);
+  ctx.fill();
+
+  // Đèn sen trên mạn thuyền
+  for (let k = -120; k <= 120; k += 60) {
+    ctx.save();
+    ctx.translate(k * scale, -2 * scale);
+    drawProceduralLotus(scale * 0.45, 2, k);
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function loop() {
+  time++;
+  ctx.clearRect(0, 0, 1080, 1920);
+
+  // 1. Vẽ nền
+  drawBackground();
+
+  // 2. Gợn sóng do thả tim
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    const r = ripples[i];
+    r.r += r.vr;
+    r.alpha -= 0.015;
+    if (r.alpha <= 0) { ripples.splice(i, 1); continue; }
+
+    ctx.save();
+    ctx.strokeStyle = `rgba(245, 215, 145, ${r.alpha})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(r.x, r.y, r.r, r.r * 0.35, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 3. Cập nhật & Vẽ Thuyền Rồng Vàng (đi theo mũi tên ĐỎ)
+  if (dragonBoat) {
+    const d = dragonBoat;
+    ctx.save();
+    d.progress += d.speed;
+    d.x = d.startX + (d.targetX - d.startX) * d.progress;
+    d.y = d.startY + (d.targetY - d.startY) * d.progress;
+    d.scale = 0.72 - d.progress * 0.44; // Phối cảnh 2.5D: ở gần to (0.72), ra xa nhỏ (0.28)
+
+    if (d.progress < 0.15) d.alpha = d.progress / 0.15;
+    else if (d.progress > 0.85) d.alpha = (1 - d.progress) / 0.15;
+    else d.alpha = 1;
+
+    ctx.globalAlpha = Math.max(0, Math.min(1, d.alpha));
+    ctx.translate(d.x, d.y);
+
+    // QUAN TRỌNG: Lật ngang để đầu rồng hướng sang TRÁI (hướng bơi tới của mũi tên đỏ)
+    ctx.scale(-1, 1);
+
+    if (IMGS.dragon) {
+      // Dùng screen blend mode để loại bỏ hoàn toàn nền đen, tạo hào quang vàng kim rực rỡ
+      ctx.globalCompositeOperation = 'screen';
+      const dw = 760 * d.scale, dh = 480 * d.scale;
+      ctx.drawImage(IMGS.dragon, -dw / 2, -dh / 2, dw, dh);
+    } else {
+      drawProceduralDragon(d.scale);
+    }
+    ctx.restore();
+
+    // Sóng rẽ nước sau đuôi thuyền
+    if (time % 6 === 0) {
+      ripples.push({ x: d.x + 30 * d.scale, y: d.y + 30 * d.scale, r: 30 * d.scale, vr: 2.2, alpha: 0.65 });
+    }
+
+    if (d.progress >= 1) { dragonBoat = null; }
+  }
+
+  // 4. Cập nhật & Vẽ Người đi từ bậc thang xuống thả hoa đăng (đi theo mũi tên XANH)
+  for (let i = walkers.length - 1; i >= 0; i--) {
+    const w = walkers[i];
+    if (w.state === 'walk_down') {
+      if (w.fade < 1) w.fade += 0.05;
+      w.progress += 0.005; // Bước đi thong thả hơn để nhìn rõ dáng đi (~3.3s)
+      w.x = w.startX + (w.targetX - w.startX) * w.progress;
+      w.y = w.startY + (w.targetY - w.startY) * w.progress;
+      w.scale = 0.44 - w.progress * 0.08; // Kích thước 2.5D: 0.44 ở bậc trên -> 0.36 khi xuống sát bờ
+      w.ft += 0.016;
+      if (w.ft > 0.16) { w.ft = 0; w.frame = (w.frame + 1) % 3; } // Bước chân 3 frame đầu: 0, 1, 2
+
+      if (w.progress >= 1) {
+        w.x = w.targetX; w.y = w.targetY;
+        w.state = 'kneel_release';
+        w.stateTimer = 0;
+        w.frame = 3;
+      }
+    } else if (w.state === 'kneel_release') {
+      w.stateTimer += 0.016;
+      // Cúi người xuống sát mép nước (frame 3 -> 4)
+      if (w.stateTimer < 0.4) w.frame = 3;
+      else {
+        w.frame = 4;
+        if (!w.hasReleased) {
+          w.hasReleased = true;
+          // Thả đèn hoa đăng chạm mặt nước tại vị trí bến riêng của nhân vật
+          w.myLantern = releaseLanternToWater(w, w.releaseX || 745, w.releaseY || 1650);
+        }
+      }
+      if (w.stateTimer > 1.2) {
+        w.state = 'pray';
+        w.stateTimer = 0;
+        w.frame = 5; // Chắp tay cầu nguyện (frame 5..7)
+      }
+    } else if (w.state === 'pray') {
+      w.stateTimer += 0.016;
+      w.frame = 5 + Math.floor((w.stateTimer * 2) % 3); // Chuyển nhẹ frame 5, 6, 7
+      // Đợi hoa trôi êm ra dòng (~6-7s) rồi trang nghiêm đứng dậy bước lên bờ
+      const flowerMoved = !w.myLantern || w.myLantern.y <= 1350 || w.stateTimer > 7;
+      if (flowerMoved) {
+        w.state = 'stand_up';
+        w.stateTimer = 0;
+        w.frame = 3; // Đứng dậy
+      }
+    } else if (w.state === 'stand_up') {
+      w.stateTimer += 0.016;
+      w.frame = 3;
+      if (w.stateTimer > 0.4) {
+        w.state = 'walk_back';
+        w.walkBackProgress = 0;
+      }
+    } else if (w.state === 'walk_back') {
+      w.walkBackProgress += 0.006; // Bước chân quay người đi lên bậc thang rời đi (~2.7s)
+      w.x = w.targetX + (w.startX - w.targetX) * w.walkBackProgress;
+      w.y = w.targetY + (w.startY - w.targetY) * w.walkBackProgress;
+      w.scale = 0.36 + w.walkBackProgress * 0.08;
+      w.fade = Math.max(0, 1 - w.walkBackProgress * 1.25); // Mờ dần trong khi đang bước đi
+
+      w.ft += 0.016;
+      if (w.ft > 0.16) { w.ft = 0; w.frame = (w.frame + 1) % 3; } // Bước chân 0, 1, 2
+
+      if (w.fade <= 0 || w.walkBackProgress >= 1) {
+        walkers.splice(i, 1);
+        if (walkerQueue.length > 0 && walkers.length < 3) {
+          startWalker(walkerQueue.shift());
+        }
+        continue;
+      }
+    }
+
+    // Vẽ nhân vật người thả
+    const a = ANIM[w.skin] || ANIM.woman;
+    const img = IMGS['anim_' + w.skin] || IMGS.anim_woman;
+    if (img) {
+      ctx.save();
+      ctx.globalAlpha = w.fade;
+      ctx.translate(w.x, w.y);
+      const kw = w.scale;
+      // Vẽ sprite
+      ctx.drawImage(img, w.frame * a.fw, 0, a.fw, a.fh, -a.fw * kw / 2, -a.fh * kw, a.fw * kw, a.fh * kw);
+
+      // Nhãn tên bám sát đỉnh đầu nhân vật (khi đứng hay quỳ đều chuẩn, không bị bay lơ lửng)
+      const headTop = (w.frame >= 4 && w.frame <= 7) ? (a.fh - 220) * kw : (a.fh - 30) * kw;
+      ctx.font = '700 26px "Be Vietnam Pro"';
+      ctx.textAlign = 'center';
+      const label = `🪷 ${w.name}`;
+      const nw = ctx.measureText(label).width + 30;
+      const nh = 40;
+      ctx.fillStyle = 'rgba(4, 12, 24, 0.92)';
+      ctx.strokeStyle = '#f5c469';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.roundRect(-nw / 2, -headTop - 42, nw, nh, 20);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, 0, -headTop - 14);
+
+      ctx.restore();
+    }
+  }
+
+  // 5. Cập nhật & Vẽ Đèn Hoa Đăng (Trôi từ mép nước tiền cảnh RA XA về phía vòm chùa)
+  // Sắp xếp theo trục Y (xa vẽ trước, gần vẽ sau theo chiều sâu)
+  lanterns.sort((a, b) => a.y - b.y);
+
+  for (let i = lanterns.length - 1; i >= 0; i--) {
+    const l = lanterns[i];
+    // Đèn trôi xuôi dòng ra xa về mặt hồ sương mờ bên trái (chỉ trên mặt nước: 1650 -> 820, không lên trời)
+    l.y -= l.speedY;
+    if (l.alpha < 1 && l.y > 960) l.alpha = Math.min(1, l.alpha + 0.04);
+
+    // Tiến trình trôi trên mặt nước: 0 (mép bờ, Y=1640) -> 1 (mặt hồ xa sương mù dưới chân núi, Y=820)
+    const progress = Math.max(0, Math.min(1, (1640 - l.y) / (1640 - 820)));
+    const isGift = l.tier >= 2;
+    // Phối cảnh 2.5D: Vừa vặn, thanh thoát (ở gần 0.68..0.74, ra xa sương mù 0.22..0.28)
+    const scale = (isGift ? 0.74 : 0.62) - progress * 0.38;
+
+    // Quỹ đạo luồng sông chuẩn 3 chặng theo đúng nét vẽ:
+    // 1. Chặng 1 (progress <= 0.45, Y: 1640 -> 1270): Xuôi theo 2 luồng vệt trăng sáng (Stroke 3 & 4)
+    // 2. Chặng 2 (progress <= 0.72, Y: 1270 -> 1050): Uốn chéo sang trái né hoàn toàn đảo chùa (Stroke 2)
+    // 3. Chặng 3 (progress > 0.72, Y: 1050 -> 820): Lướt vào vùng nước sương mờ bên góc trái chân núi (Stroke 1)
+    let riverBaseX;
+    if (progress <= 0.45) {
+      const t = progress / 0.45;
+      riverBaseX = l.startX + (660 + l.spreadX - l.startX) * t;
+    } else if (progress <= 0.72) {
+      const t = (progress - 0.45) / 0.27;
+      riverBaseX = (660 + l.spreadX) * (1 - t) + (480 + l.spreadX * 0.6) * t;
+    } else {
+      const t = (progress - 0.72) / 0.28;
+      riverBaseX = (480 + l.spreadX * 0.6) * (1 - t) + (140 + l.spreadX * 0.3) * t;
+    }
+
+    // Khi chạm vùng sương mù chân núi hồ xa (progress > 0.85, Y <= 940), hoa mờ dần tự nhiên tan vào sương
+    if (progress > 0.85) {
+      l.alpha = Math.max(0, (l.y - 820) / (940 - 820));
+    }
+
+    const sway = Math.sin(time * l.swaySpeed + l.swayPhase) * l.swayAmp * (1 - progress * 0.4);
+    const currentX = riverBaseX + sway;
+
+    ctx.save();
+    ctx.globalAlpha = l.alpha;
+    ctx.translate(currentX, l.y);
+
+    // 1. Nếu là GIFT: Cột sáng Phật quang từ trời + Vòng hào quang vàng xoay tỏa + Hạt kim tuyến
+    if (isGift) {
+      if (progress < 0.45) {
+        const beamAlpha = (1 - progress / 0.45) * 0.65;
+        const beamGrad = ctx.createLinearGradient(0, -900, 0, 10 * scale);
+        beamGrad.addColorStop(0, 'transparent');
+        beamGrad.addColorStop(0.6, `rgba(255, 235, 130, ${beamAlpha * 0.4})`);
+        beamGrad.addColorStop(1, `rgba(255, 215, 0, ${beamAlpha})`);
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.moveTo(-35 * scale, -900);
+        ctx.lineTo(35 * scale, -900);
+        ctx.lineTo(95 * scale, 20 * scale);
+        ctx.lineTo(-95 * scale, 20 * scale);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Vòng hào quang Mandala hoàng kim xoay tỏa
+      ctx.save();
+      ctx.rotate(time * 0.018);
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.55)';
+      ctx.lineWidth = 2.2 * scale;
+      ctx.beginPath();
+      for (let a = 0; a < 8; a++) {
+        const ang = a * Math.PI / 4;
+        ctx.moveTo(Math.cos(ang) * 30 * scale, Math.sin(ang) * 12 * scale);
+        ctx.lineTo(Math.cos(ang) * 115 * scale, Math.sin(ang) * 44 * scale);
+      }
+      ctx.stroke();
+
+      // Vòng tròn hào quang phụ
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 75 * scale, 28 * scale, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Suối hạt bụi vàng (Sparkle Fountain) bốc lên từ đài sen
+      for (let sIdx = 0; sIdx < 6; sIdx++) {
+        const spPhase = (time * 0.04 + sIdx * 1.1) % 1;
+        const spX = Math.sin(time * 0.05 + sIdx * 2) * 28 * scale;
+        const spY = -spPhase * 110 * scale;
+        const spAlpha = Math.sin(spPhase * Math.PI);
+        ctx.fillStyle = `rgba(255, 235, 120, ${spAlpha})`;
+        ctx.beginPath();
+        ctx.arc(spX, spY, (3 + sIdx % 2) * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 2. Vòng sáng vàng ấm phản chiếu trên mặt nước
+    const wGlow = ctx.createRadialGradient(0, 14 * scale, 5 * scale, 0, 18 * scale, (isGift ? 140 : 70) * scale);
+    wGlow.addColorStop(0, isGift ? 'rgba(255, 215, 0, 0.85)' : 'rgba(255, 140, 60, 0.45)');
+    wGlow.addColorStop(0.5, isGift ? 'rgba(255, 130, 20, 0.32)' : 'rgba(255, 80, 20, 0.12)');
+    wGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = wGlow;
+    ctx.beginPath();
+    ctx.ellipse(0, 18 * scale, (isGift ? 140 : 70) * scale, (isGift ? 48 : 24) * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. Vẽ hình ảnh hoặc procedural
+    const lotusImg = IMGS.lotus || IMGS.lantern;
+    if (lotusImg) {
+      ctx.globalCompositeOperation = 'screen';
+      const lw = (isGift ? 310 : 260) * scale, lh = (isGift ? 310 : 260) * scale;
+      ctx.drawImage(lotusImg, -lw / 2, -lh / 2, lw, lh);
+      ctx.globalCompositeOperation = 'source-over';
+    } else {
+      drawProceduralLotus(scale * (isGift ? 1.2 : 1), l.tier, l.flamePhase);
+    }
+
+    // 4. Tên người xem & Lời nguyện (Luôn giữ chữ suốt hành trình, không bị mất)
+    const fSize = Math.max(20, Math.round(36 * scale));
+    ctx.font = `700 ${fSize}px "Be Vietnam Pro"`;
+    ctx.textAlign = 'center';
+
+    // Nhãn tên người xem (nằm dưới chân đèn sen)
+    const nameTxt = (isGift ? '👑 ' : '') + l.name;
+    const nw = ctx.measureText(nameTxt).width + 30;
+    const nh = 38;
+    const nameY = Math.max(48, 88 * scale);
+    ctx.fillStyle = isGift ? 'rgba(30, 16, 4, 0.94)' : 'rgba(4, 12, 24, 0.92)';
+    ctx.strokeStyle = isGift ? '#ffd700' : 'rgba(245, 196, 105, 0.85)';
+    ctx.lineWidth = isGift ? 2.5 : 1.5;
+    ctx.beginPath();
+    ctx.roundRect(-nw / 2, nameY, nw, nh, 19);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = isGift ? '#ffd700' : '#ffffff';
+    ctx.fillText(nameTxt, 0, nameY + 27);
+
+    // Bong bóng lời nguyện (nằm trên đỉnh nến - luôn hiển thị suốt hành trình)
+    if (l.text) {
+      const pSize = Math.max(18, Math.round(32 * scale));
+      ctx.font = `600 ${pSize}px "Be Vietnam Pro"`;
+      const tw = ctx.measureText(l.text).width + 32;
+      const th = 40;
+      const bubbleY = -Math.max(68, 138 * scale);
+      ctx.fillStyle = 'rgba(255, 250, 235, 0.96)';
+      ctx.strokeStyle = isGift ? '#ffd700' : 'rgba(245, 196, 105, 0.7)';
+      ctx.lineWidth = isGift ? 2 : 1.5;
+      ctx.beginPath();
+      ctx.roundRect(-tw / 2, bubbleY, tw, th, 14);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#241203';
+      ctx.fillText(l.text, 0, bubbleY + 27);
+    }
+
+    ctx.restore();
+
+    // Khi đến hết mặt nước hồ sương mù (Y <= 820) hoặc đã tan hết vào sương đêm
+    if (l.y <= 820 || l.alpha <= 0) {
+      lanterns.splice(i, 1);
+      updateCounter();
+    }
+  }
+
+  // 5. Đom đóm phát sáng bay lượn
+  for (const f of fireflies) {
+    f.x += f.vx;
+    f.y += f.vy;
+    f.alpha += f.speed;
+    if (f.alpha > 1 || f.alpha < 0) f.speed = -f.speed;
+
+    if (f.x < 0) f.x = 1080;
+    if (f.x > 1080) f.x = 0;
+    if (f.y < HORIZON_Y) f.y = 1920;
+    if (f.y > 1920) f.y = HORIZON_Y;
+
+    ctx.save();
+    const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.size * 2.5);
+    g.addColorStop(0, `rgba(255, 250, 150, ${Math.abs(f.alpha)})`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.size * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // 6. Cánh hoa sen rơi khi có quà
+  for (let i = petals.length - 1; i >= 0; i--) {
+    const p = petals[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.rot += p.vrot;
+    p.life--;
+    if (p.life <= 0 || p.y > 1920) { petals.splice(i, 1); continue; }
+
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, p.size * 0.45, p.size, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // 7. Đèn trời (Sky Lanterns) bay lượn lên trăng rằm
+  for (let i = skyLanterns.length - 1; i >= 0; i--) {
+    const s = skyLanterns[i];
+    s.y -= s.vy;
+    s.x += s.vx + Math.sin(time * 0.025 + s.wobble) * 0.8;
+    s.scale = Math.max(0.28, s.scale - 0.0006);
+
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    const sc = s.scale;
+
+    // Hào quang ấm áp tỏa ra
+    const glow = ctx.createRadialGradient(0, 0, 10 * sc, 0, 0, 65 * sc);
+    glow.addColorStop(0, 'rgba(255, 200, 80, 0.7)');
+    glow.addColorStop(0.5, 'rgba(255, 120, 20, 0.25)');
+    glow.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(0, 0, 65 * sc, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Thân đèn trời truyền thống (hình thang vòm lồng đèn)
+    const lGrad = ctx.createLinearGradient(0, -35 * sc, 0, 25 * sc);
+    lGrad.addColorStop(0, '#ffe89c');
+    lGrad.addColorStop(0.5, '#ff9922');
+    lGrad.addColorStop(1, '#b33000');
+    ctx.fillStyle = lGrad;
+    ctx.beginPath();
+    ctx.moveTo(-22 * sc, 20 * sc);
+    ctx.lineTo(-28 * sc, -25 * sc);
+    ctx.quadraticCurveTo(0, -42 * sc, 28 * sc, -25 * sc);
+    ctx.lineTo(22 * sc, 20 * sc);
+    ctx.quadraticCurveTo(0, 26 * sc, -22 * sc, 20 * sc);
+    ctx.closePath();
+    ctx.fill();
+
+    // Lõi lửa phát sáng bên trong
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(0, 10 * sc, 6 * sc, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dải liễn đỏ ghi tên người cầu nguyện
+    if (sc > 0.45) {
+      ctx.font = '700 20px "Be Vietnam Pro"';
+      ctx.textAlign = 'center';
+      const label = `🏮 ${s.name}`;
+      const nw = ctx.measureText(label).width + 20;
+      ctx.fillStyle = 'rgba(120, 15, 10, 0.92)';
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(-nw / 2, 34 * sc, nw, 32, 16);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffeaa7';
+      ctx.fillText(label, 0, 34 * sc + 22);
+    }
+
+    ctx.restore();
+
+    if (s.y < 80) {
+      skyLanterns.splice(i, 1);
+    }
+  }
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ======================= Web Audio API ======================= */
+let AC = null, master = null, musicGain = null, sfx = null;
+const TRACKS = ['/assets/music/music1.mp3', '/assets/music/music2.mp3'];
+let trackIdx = 0, musicEl = null;
+
+function startAudio() {
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  master = AC.createGain(); master.gain.value = 0.9; master.connect(AC.destination);
+  musicGain = AC.createGain(); musicGain.gain.value = 0.45; musicGain.connect(master);
+  sfx = AC.createGain(); sfx.gain.value = 1; sfx.connect(master);
+  nextTrack();
+  bell(false);
+}
+
+function nextTrack() {
+  if (musicEl) musicEl.pause();
+  musicEl = new Audio(TRACKS[trackIdx++ % TRACKS.length]);
+  const src = AC.createMediaElementSource(musicEl);
+  src.connect(musicGain);
+  musicEl.onended = nextTrack;
+  musicEl.play().catch(() => {});
+}
+
+// Tiếng chuông thanh tịnh
+function bell(big) {
+  if (!AC) return;
+  const t = AC.currentTime, k = big ? 2.2 : 1;
+  for (const [f, a, d] of [[216, 0.55, 7], [432, 0.35, 5], [1296, 0.12, 3]]) {
+    const o = AC.createOscillator(); o.type = 'sine'; o.frequency.value = f * (big ? 0.75 : 1);
+    const g = AC.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(a * k * 0.7, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0005, t + d * k);
+    o.connect(g); g.connect(sfx);
+    o.start(t); o.stop(t + d * k + 0.1);
+  }
+}
+
+// Giọng đọc AI hồi hướng
+const ttsQ = []; let ttsPlaying = false;
+function queueTTS(url) { ttsQ.push(url); playTTS(); }
+function playTTS() {
+  if (ttsPlaying || !ttsQ.length) return;
+  if (!AC || AC.state === 'suspended') {
+    try { if (AC) AC.resume(); else startAudio(); } catch {}
+  }
+  ttsPlaying = true;
+  const url = ttsQ.shift();
+  const el = new Audio(url);
+
+  if (AC && musicGain && master) {
+    try {
+      const src = AC.createMediaElementSource(el);
+      const g = AC.createGain(); g.gain.value = 1.45;
+      src.connect(g); g.connect(master);
+      musicGain.gain.linearRampToValueAtTime(0.12, AC.currentTime + 0.3);
+      el.onended = el.onerror = () => {
+        musicGain.gain.linearRampToValueAtTime(0.45, AC.currentTime + 0.5);
+        ttsPlaying = false;
+        setTimeout(playTTS, 400);
+      };
+      el.play().catch(() => { ttsPlaying = false; });
+      return;
+    } catch {}
+  }
+
+  // Fallback phát trực tiếp không qua AudioContext
+  el.onended = el.onerror = () => {
+    ttsPlaying = false;
+    setTimeout(playTTS, 400);
+  };
+  el.play().catch(() => { ttsPlaying = false; });
+}
+
+// Tự kích hoạt âm thanh ngay khi chạy trong TikTok Live Studio / click chuột
+window.addEventListener('click', () => { if (!AC) startAudio(); else if (AC.state === 'suspended') AC.resume(); });
+window.addEventListener('keydown', () => { if (!AC) startAudio(); else if (AC.state === 'suspended') AC.resume(); });
+try { startAudio(); } catch {}
+
+/* ======================= WebSocket Connection ======================= */
+let ws;
+function connectWS() {
+  const host = location.host || 'localhost:3002';
+  ws = new WebSocket(`ws://${host}?role=overlay`);
+  ws.onmessage = e => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.t === 'state') {
+        if (d.viewers) updateMerit(d.viewers);
+        if (d.totalLikes !== undefined) {
+          const lc = document.getElementById('likeCount');
+          const lg = document.getElementById('likeGoal');
+          if (lc) lc.textContent = d.totalLikes;
+          if (lg) lg.textContent = `/ ${d.nextLikeGoal || 100} tim`;
+        }
+      } else if (d.t === 'merit') {
+        if (d.viewers) updateMerit(d.viewers);
+      } else if (d.t === 'lantern') {
+        spawnLanternItem(d.item);
+        bell(false);
+      } else if (d.t === 'gift') {
+        showGiftBanner(d.name, d.giftName, d.count, d.prayer);
+        recordMerit(d.id, d.name, d.coins, d.avatar);
+      } else if (d.t === 'dragon_boat') {
+        triggerDragonBoat(d.name, d.giftName, d.prayer);
+        recordMerit(d.id, d.name, d.coins, d.avatar);
+      } else if (d.t === 'sky_lantern') {
+        spawnSkyLantern(d.name);
+      } else if (d.t === 'milestone') {
+        showGiftBanner('Đại Chúng Đồng Lòng', `✦ Đạt Mốc ${d.target} Tim ✦`, 1, d.name);
+      } else if (d.t === 'petals') {
+        for (let i = 0; i < 45; i++) {
+          petals.push({
+            x: 150 + Math.random() * 780,
+            y: 700 + Math.random() * 400,
+            vx: (Math.random() - 0.5) * 1.8,
+            vy: 1.2 + Math.random() * 2.0,
+            rot: Math.random() * Math.PI,
+            vrot: (Math.random() - 0.5) * 0.05,
+            size: 10 + Math.random() * 12,
+            color: Math.random() > 0.4 ? '#ffd700' : '#ff7597',
+            life: 280,
+          });
+        }
+      } else if (d.t === 'bell') {
+        bell(true);
+      } else if (d.t === 'like') {
+        if (d.total !== undefined) {
+          const lc = document.getElementById('likeCount');
+          const lg = document.getElementById('likeGoal');
+          if (lc) lc.textContent = d.total;
+          if (lg) lg.textContent = `/ ${d.next || 100} tim`;
+        }
+        // Thả tim tạo sóng nước và thêm đom đóm
+        for (let i = 0; i < Math.min(6, d.count || 2); i++) {
+          ripples.push({
+            x: 200 + Math.random() * 680,
+            y: HORIZON_Y + 100 + Math.random() * 800,
+            r: 10,
+            vr: 1.8 + Math.random() * 1.5,
+            alpha: 0.65,
+          });
+        }
+      } else if (d.t === 'tts') {
+        queueTTS(d.url);
+      } else if (d.t === 'clear') {
+        lanterns.length = 0;
+        const lc = document.getElementById('likeCount');
+        const lg = document.getElementById('likeGoal');
+        if (lc) lc.textContent = '0';
+        if (lg) lg.textContent = '/ 100 tim';
+        updateCounter();
+      }
+    } catch {}
+  };
+  ws.onclose = () => setTimeout(connectWS, 2000);
+}
+connectWS();
+</script>
+</body>
+</html>
+

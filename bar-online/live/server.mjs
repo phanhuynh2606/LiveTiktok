@@ -41,16 +41,17 @@ function addLog(s) {
   console.log(line);
 }
 
-const CAPS = [24, 36, 60];
+const CAPS = [24, 36];
 function capacity() {
   if (settings.seatMode !== 'auto') return +settings.seatMode;
-  const n = viewers.size;
-  return CAPS.find(c => n <= c) || 60;
+  return viewers.size > 24 ? 36 : 24;
 }
 
 const SKIN_WORDS = [
-  ['woman', ['nữ', 'nu', 'gái', 'gai', 'đầm', 'dam', 'váy', 'vay', 'chị', 'chi']],
-  ['man', ['nam', 'anh', 'trai', 'vest', 'dân chơi', 'dan choi', 'dj', 'chủ tịch', 'chu tich']],
+  ['woman', ['nữ', 'nu', 'đầm', 'dam', 'váy', 'vay', 'tiểu thư', 'tieu thu']],
+  ['girl', ['gái', 'gai', 'sexy', 'ngầu', 'ngau', 'bốc', 'boc', 'croptop']],
+  ['man', ['nam', 'anh', 'vest', 'vip', 'chủ tịch', 'chu tich', 'công tử', 'cong tu']],
+  ['streetwear', ['dân chơi', 'dan choi', 'hiphop', 'streetwear', 'trẻ', 'tre', 'quẩy', 'quay']]
 ];
 function skinFromText(t) {
   const w = String(t || '').toLowerCase().normalize('NFC').replace(/[^\p{L}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
@@ -58,7 +59,7 @@ function skinFromText(t) {
   for (const [skin, words] of SKIN_WORDS) if (words.some(k => w === k || w.startsWith(k + ' '))) return skin;
   return null;
 }
-const DEFAULT_SKINS = ['man', 'woman', 'man', 'woman'];
+const DEFAULT_SKINS = ['man', 'woman', 'streetwear', 'girl'];
 
 function pub(v) {
   return { id: v.id, name: v.name, skin: v.skin, avatar: v.avatar || '', coins: v.coins, demo: !!v.demo };
@@ -82,7 +83,7 @@ function seat(id, name, opts = {}) {
     if (opts.avatar) v.avatar = opts.avatar;
     return { v, isNew: false };
   }
-  const maxCap = settings.seatMode !== 'auto' ? +settings.seatMode : 60;
+  const maxCap = settings.seatMode !== 'auto' ? +settings.seatMode : 36;
   if (viewers.size >= maxCap) {
     const quiet = [...viewers.values()].filter(x => x.coins === 0).sort((a, b) => a.lastAt - b.lastAt)[0];
     if (!quiet) return { v: null, isNew: false };
@@ -353,10 +354,10 @@ const DEMO_COMMENTS = ['Nhạc căng quá anh em ơi!', 'Lên đồ lên đồ!'
 
 function fillDemo(n) {
   const have = [...viewers.values()].filter(v => v.demo).length;
-  const maxCap = capacity();
+  const maxCap = settings.seatMode !== 'auto' ? +settings.seatMode : 36;
   for (let i = have; i < n && viewers.size < maxCap; i++) {
     const name = DEMO_NAMES[i % DEMO_NAMES.length] + (i >= DEMO_NAMES.length ? ' ' + (Math.floor(i / DEMO_NAMES.length) + 1) : '');
-    seat('demo_' + i, name, { demo: true, skin: i % 2 === 0 ? 'man' : 'woman' });
+    seat('demo_' + i, name, { demo: true, skin: DEFAULT_SKINS[i % DEFAULT_SKINS.length] });
   }
   addLog(`Đổ khách mẫu: ${viewers.size} khách trên sàn`);
 }
@@ -372,7 +373,7 @@ function setBots(on, n, pace) {
   clearInterval(botTimer); botTimer = null;
   if (on) {
     n = Math.max(1, Math.min(60, n));
-    for (let i = 0; i < n; i++) seat('bot_' + i, DEMO_NAMES[(i + 4) % DEMO_NAMES.length] + ' ·bot', { demo: true, skin: i % 2 === 0 ? 'man' : 'woman' });
+    for (let i = 0; i < n; i++) seat('bot_' + i, DEMO_NAMES[(i + 4) % DEMO_NAMES.length] + ' ·bot', { demo: true, skin: DEFAULT_SKINS[i % DEFAULT_SKINS.length] });
     const every = { slow: 4000, mid: 1800, fast: 800 }[pace] || 1800;
     botTimer = setInterval(() => {
       const ids = [...viewers.keys()].filter(id => id.startsWith('bot_'));
@@ -399,6 +400,8 @@ function onControl(m) {
     case 'focus': broadcast({ t: 'focus', id: m.id }); break;
     case 'strobe': broadcast({ t: 'strobe' }); break;
     case 'airhorn': broadcast({ t: 'airhorn' }); break;
+    case 'smoke': broadcast({ t: 'smoke' }); break;
+    case 'toast': broadcast({ t: 'toast' }); break;
     case 'say': if (m.text) say(m.text); break;
     case 'settings':
       if (m.settings) {

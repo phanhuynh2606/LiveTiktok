@@ -9,6 +9,7 @@ Bộ công cụ tương tác livestream TikTok thời gian thực (Realtime Inte
 | Thư mục | Chủ đề | Mô tả |
 |---|---|---|
 | [`chanh-dien-online/`](file:///d:/Project/TiktokLive/chanh-dien-online) | **Chánh Điện Tịnh Tâm** | Chánh điện 2.5D; người xem bình luận để vào ngồi tụng kinh, gõ mõ, tặng quà xướng tên hồi hướng công đức. Có bản web tĩnh (Cloudflare Pages) và bản phát LIVE. |
+| [`hoa-dang-online/`](file:///d:/Project/TiktokLive/hoa-dang-online) | **Thả Thuyền Hoa Đăng** | Dòng sông trôi 2.5D; bình luận thả đèn hoa đăng mang tên người xem, thả tim tạo sóng và đom đóm, tặng quà lớn triệu hồi Thuyền Rồng Vàng phát sáng rẽ sóng. |
 | [`bar-online/`](file:///d:/Project/TiktokLive/bar-online) | **Vũ Trường Cõi Mạng** | Sàn nhảy Bar/EDM neon; người xem vào sàn nhún nhảy theo nhịp bass, đại gia nạp quà mở bàn VIP, MC Hype xướng tên dồn dập. |
 | [`docs/`](file:///d:/Project/TiktokLive/docs) | **Tài liệu & Kế hoạch** | Lưu trữ ý tưởng, phân tích tương tác và danh sách task phát triển. |
 
